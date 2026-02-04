@@ -1,17 +1,18 @@
-import { Request, Response } from 'express';
-import * as multer from 'multer';
-import * as admin from 'firebase-admin';
-import { db } from '../config/firebase';
+import { Request, Response } from "express";
+import * as multer from "multer";
+import * as admin from "firebase-admin";
+import { db } from "../config/firebase";
+import { formatToSAST } from "../utils/time";
 
 //admin CRUD operations for admins to upload SOP PDFs and process them
-const adminCollection = db.collection('admins');;
+const adminCollection = db.collection("admins");
 
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
     const { email, name, role } = req.body;
-    
+
     // Check if admin already exists
-    const existing = await adminCollection.where('email', '==', email).get();
+    const existing = await adminCollection.where("email", "==", email).get();
     if (!existing.empty) {
       return res.status(400).json({ message: "Admin already registered" });
     }
@@ -19,8 +20,8 @@ export const registerAdmin = async (req: Request, res: Response) => {
     const newAdmin = {
       email,
       name,
-  
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
     const docRef = await adminCollection.add(newAdmin);
@@ -33,7 +34,12 @@ export const registerAdmin = async (req: Request, res: Response) => {
 export const getAllAdmins = async (_req: Request, res: Response) => {
   try {
     const snapshot = await adminCollection.get();
-    const admins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const admins = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: formatToSAST(doc.data().createdAt),
+      updatedAt: formatToSAST(doc.data().updatedAt),
+    }));
     res.json(admins);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -43,9 +49,9 @@ export const getAllAdmins = async (_req: Request, res: Response) => {
 export const verifyAdminLogin = async (req: Request, res: Response) => {
   try {
     const { email } = req.body; // Sent from frontend after Google/Email login
-    
-    const snapshot = await adminCollection.where('email', '==', email).get();
-    
+
+    const snapshot = await adminCollection.where("email", "==", email).get();
+
     if (snapshot.empty) {
       return res.status(403).json({ message: "Access denied. Not an admin." });
     }
@@ -69,7 +75,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "No data provided to update." });
     }
 
-    const adminRef = db.collection('admins').doc(id);
+    const adminRef = db.collection("admins").doc(id);
     const doc = await adminRef.get();
 
     if (!doc.exists) {
@@ -78,7 +84,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
 
     // 2. Build the update object dynamically (only include defined values)
     const updateData: any = {
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
     if (name !== undefined) updateData.name = name;
@@ -86,7 +92,10 @@ export const updateAdmin = async (req: Request, res: Response) => {
 
     await adminRef.update(updateData);
 
-    res.json({ message: "Admin updated successfully", updatedFields: Object.keys(updateData) });
+    res.json({
+      message: "Admin updated successfully",
+      updatedFields: Object.keys(updateData),
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -106,24 +115,22 @@ export const deleteAdmin = async (req: Request<AdminParams>, res: Response) => {
   }
 };
 
-
-
 //upload SOP PDF and process
 export const uploadSOP = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
     // TODO: Implement PDF processing and vector store integration
     // For now, just acknowledge the upload
-    res.json({ 
-      message: 'File uploaded successfully',
+    res.json({
+      message: "File uploaded successfully",
       filename: req.file.filename,
-      originalName: req.file.originalname
+      originalName: req.file.originalname,
     });
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'Failed to process file upload' });
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Failed to process file upload" });
   }
 };
