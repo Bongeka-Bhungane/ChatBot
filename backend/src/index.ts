@@ -6,9 +6,8 @@ import { chatWithModel } from "./controllers/chatController";
 import { uploadSOP } from "./controllers/adminController";
 import * as admin from "firebase-admin";
 import path from 'path';
-
-
-
+import adminRoutes from "./routes/admin";
+import './config/firebase';
 
 dotenv.config();
 const app = express();
@@ -58,7 +57,7 @@ testDbConnection();
 app.post("/api/chat", chatWithModel);
 
 // admin CRUD endpoints would go here
-
+app.use('/api/admins', adminRoutes);
 // Admin Endpoint (Document Ingestion)
 app.post("/api/admin/upload", upload.single("file"), uploadSOP);
 
