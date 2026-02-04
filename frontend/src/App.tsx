@@ -1,16 +1,24 @@
-import { useState } from 'react'
+import { useState } from "react";
+import SearchBar from "./components/searchbar";
 
+const users = ["Alice", "Brian", "Ntombenhle", "Sibusiso"];
 
-import './App.css'
+export default function Example() {
+  const [search, setSearch] = useState("");
 
-function App() {
- 
+  const filteredUsers = users.filter((name) =>
+    name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <>
-      
-    </>
-  )
-}
+      <SearchBar value={search} onChange={setSearch} />
 
-export default App
+      <ul>
+        {filteredUsers.map((name) => (
+          <li key={name}>{name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
