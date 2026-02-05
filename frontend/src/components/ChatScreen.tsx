@@ -43,7 +43,7 @@ export default function ChatScreen() {
       {/* Chat Button (to open popup) */}
       {!isOpen && (
         <button className="chat-btn-floating" onClick={() => setIsOpen(true)}>
-          💬 Chatbot
+          💬 
         </button>
       )}
 
