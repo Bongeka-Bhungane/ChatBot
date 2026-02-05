@@ -1,0 +1,95 @@
+/* Container to center login card */
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #1d4f5a 0%,
+    #064d00 100%
+  );
+  font-family: "Arial", sans-serif;
+}
+
+/* Card */
+.login-card {
+  background: #0d2937dd; /* semi-transparent dark */
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  width: 350px;
+  text-align: center;
+  color: white;
+}
+
+.login-card h2 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+/* Form elements */
+.login-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card label {
+  text-align: left;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.login-card input {
+  padding: 0.8rem;
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+}
+
+.login-card input:focus {
+  outline: 2px solid #4caf50;
+}
+
+/* Login button */
+.login-card button {
+  padding: 0.8rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-card button:hover {
+  background-color: #45a049;
+}
+
+/* Forgot password link */
+.login-card .forgot-password {
+  display: block;
+  margin-top: 1rem;
+  color: #a5d6a7;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+.login-card .forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .login-card {
+    width: 90%;
+    padding: 2rem 1.5rem;
+  }
+
+  .login-card h2 {
+    font-size: 1.7rem;
+  }
+}
