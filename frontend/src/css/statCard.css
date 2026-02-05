@@ -1,0 +1,40 @@
+.stat-card {
+  width: 220px;
+  padding: 18px 20px;
+
+  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1.5px solid #e5e7eb;
+
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+}
+
+/* Hover effect */
+.stat-card:hover {
+  border-color: #13aa52;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(19, 170, 82, 0.18);
+}
+
+/* Label */
+.stat-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+/* Value */
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #13aa52;
+  margin: 0;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}

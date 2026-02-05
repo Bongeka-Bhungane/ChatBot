@@ -1,9 +1,28 @@
-import React from 'react'
+import React from "react";
+import "../css/inputComponentcss.css";
 
-export default function Input() {
+type InputProps = {
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: React.HTMLInputTypeAttribute;
+};
+
+const Input: React.FC<InputProps> = ({
+  placeholder,
+  value,
+  onChange,
+  type = "text",
+}) => {
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <input
+      className="input"
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+};
+
+export default Input;
