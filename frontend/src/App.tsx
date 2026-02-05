@@ -1,24 +1,19 @@
-import { useState } from "react";
-import SearchBar from "./components/searchbar";
+import { useState } from 'react'
 
-const users = ["Alice", "Brian", "Ntombenhle", "Sibusiso"];
 
-export default function Example() {
-  const [search, setSearch] = useState("");
+import './App.css'
+import StatCard from './components/starCard';
 
-  const filteredUsers = users.filter((name) =>
-    name.toLowerCase().includes(search.toLowerCase()),
-  );
+function App() {
+ 
 
   return (
     <>
-      <SearchBar value={search} onChange={setSearch} />
-
-      <ul>
-        {filteredUsers.map((name) => (
-          <li key={name}>{name}</li>
-        ))}
-      </ul>
+      <StatCard name="Total Users" value={128} />
+      <StatCard name="Active Sessions" value={34} />
+      <StatCard name="Revenue" value="$4,200" />
     </>
   );
 }
+
+export default App
