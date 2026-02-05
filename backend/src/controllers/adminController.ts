@@ -1,136 +1,68 @@
 import { Request, Response } from "express";
-import * as multer from "multer";
-import * as admin from "firebase-admin";
-import { db } from "../config/firebase";
-import { formatToSAST } from "../utils/time";
+import {
+  addAdminDB,
+  deleteAdminDB,
+  getAdminByIdDB,
+  getAdminsDB,
+  updateAdminDB,
+} from "../Services/adminService";
+import { Admin } from "../types/admin";
+import { validateEmail } from "../utils/emailValidator";
 
-//admin CRUD operations for admins to upload SOP PDFs and process them
-const adminCollection = db.collection("admins");
-
-export const registerAdmin = async (req: Request, res: Response) => {
+export const getAllAdmins = async (req: Request, res: Response) => {
   try {
-    const { email, name, role } = req.body;
-
-    // Check if admin already exists
-    const existing = await adminCollection.where("email", "==", email).get();
-    if (!existing.empty) {
-      return res.status(400).json({ message: "Admin already registered" });
-    }
-
-    const newAdmin = {
-      email,
-      name,
-
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    };
-
-    const docRef = await adminCollection.add(newAdmin);
-    res.status(201).json({ id: docRef.id, ...newAdmin });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const getAllAdmins = async (_req: Request, res: Response) => {
-  try {
-    const snapshot = await adminCollection.get();
-    const admins = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: formatToSAST(doc.data().createdAt),
-      updatedAt: formatToSAST(doc.data().updatedAt),
-    }));
+    const admins = await getAdminsDB();
     res.json(admins);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch admins." });
   }
 };
-//login admin function
-export const verifyAdminLogin = async (req: Request, res: Response) => {
+
+export const getAdminById = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
   try {
-    const { email } = req.body; // Sent from frontend after Google/Email login
+    const admin = await getAdminByIdDB(id);
+    res.json(admin);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch admin." });
+  }
+};
 
-    const snapshot = await adminCollection.where("email", "==", email).get();
+export const addAdmin = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body as Admin;
 
-    if (snapshot.empty) {
-      return res.status(403).json({ message: "Access denied. Not an admin." });
+    if (!validateEmail(payload.email)) {
+      return res.status(400).json({ error: "Invalid email format." });
     }
 
-    const adminData = snapshot.docs[0].data();
-    res.json({ message: "Login successful", admin: adminData });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    await addAdminDB(payload);
+
+    res.status(201).json({ message: "Admin added successfully." });
+
+    // Implementation for adding an admin
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add admin." });
   }
 };
-
-// Update an existing Admin's details
 
 export const updateAdmin = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const payload = req.body as Admin;
   try {
-    const id = req.params.id as string;
-    const { name, role } = req.body;
-
-    // 1. Check if the body is empty or missing data
-    if (!name && !role) {
-      return res.status(400).json({ message: "No data provided to update." });
-    }
-
-    const adminRef = db.collection("admins").doc(id);
-    const doc = await adminRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
-
-    // 2. Build the update object dynamically (only include defined values)
-    const updateData: any = {
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    };
-
-    if (name !== undefined) updateData.name = name;
-    if (role !== undefined) updateData.role = role;
-
-    await adminRef.update(updateData);
-
-    res.json({
-      message: "Admin updated successfully",
-      updatedFields: Object.keys(updateData),
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Delete an Admin
-interface AdminParams {
-  id: string;
-}
-export const deleteAdmin = async (req: Request<AdminParams>, res: Response) => {
-  try {
-    const { id } = req.params;
-    await adminCollection.doc(id).delete();
-    res.json({ message: "Admin deleted successfully" });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-//upload SOP PDF and process
-export const uploadSOP = async (req: Request, res: Response) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    // TODO: Implement PDF processing and vector store integration
-    // For now, just acknowledge the upload
-    res.json({
-      message: "File uploaded successfully",
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-    });
+    await updateAdminDB(id, payload);
+    res.json({ message: "Admin updated successfully." });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: "Failed to process file upload" });
+    res.status(500).json({ error: "Failed to update admin." });
+  }
+};
+
+export const deleteAdmin = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  try {
+    await deleteAdminDB(id);
+    res.json({ message: "Admin deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete admin." });
   }
 };

@@ -1,6 +1,7 @@
 export interface Admin {
   id?: string;
+  fullName: string;
   email: string;
-  name: string;
-  createdAt: FirebaseFirestore.Timestamp | Date;
+  password: string;
+  createdAt?: Date;
 }
