@@ -5,7 +5,7 @@ import multer from "multer";
 import { chatWithModel } from "./controllers/chatController";
 import path from "path";
 import adminRoutes from "./routes/adminRoutes";
-import "./config/firebase";
+import bucketRouter from "./routes/bucketRouter";
 
 dotenv.config();
 const app = express();
@@ -17,6 +17,7 @@ app.use(express.json());
 // Learner Endpoint
 app.post("/api/chat", chatWithModel);
 app.use("/api/admins", adminRoutes);
+app.use("/api/bucket", bucketRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
