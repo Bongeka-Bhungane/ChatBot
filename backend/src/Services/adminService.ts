@@ -1,4 +1,4 @@
-import supabase from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import { Admin } from "../types/admin";
 
 export const getAdminsDB = async () => {
