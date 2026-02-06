@@ -1,0 +1,223 @@
+.chat-screen {
+  width: 100%;
+  height: 92vh;
+  margin: auto;
+  background: #ffffff; /* white background like screenshot */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* Chat Body */
+.chat-body {
+  flex: 1;
+  width: 100%;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  background: #f0f0f0; /* light grey area behind messages */
+}
+
+/* Chat bubbles */
+.chat-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+ 
+
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
+  background: #94C73D; /* lime for user */
+  color: white
+}
+
+.chat-bubble.bot {
+  align-self: flex-start;
+  background:#133F4C; /* dark green */
+  color: #ffffff; /* white text */
+}
+
+/* Chat Footer */
+.chat-footer {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 10px;
+  background: #d9d9d9; /* grey background like screenshot */
+}
+
+.chat-footer input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+  background: #e5e5e5; /* grey input */
+  font-size: 14px;
+}
+
+.chat-footer button {
+  background: #94C73D; /* lime button */
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.model-selector {
+    display: flex;
+    justify-content: end;
+    padding: 8px;
+    background: #d9d9d9; /* grey background like screenshot */
+}
+
+
+/* Floating Chat Button */
+.chat-btn-floating {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #94C73D; /* lime */
+  color: #133F4C; /* dark green */
+  border: none;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.chat-btn-floating:hover {
+  background: #91c100;
+}
+
+/* Chat Popup */
+.chat-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 570px;
+  height: 500px;
+  background: #133F4C; /* dark green */
+  border: 2px solid #648E3C; /* lime */
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+/* Chat Header */
+.chat-header {
+  background: #133F4C; /* dark green */
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+}
+
+.chat-close-btn {
+  background: #648E3C; /* lime */
+  color: #133F4C; /* dark green */
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-close-btn:hover {
+  background: #91c100;
+}
+
+/* Media Query for Chat Popup - Responsive */
+@media (max-width: 768px) {
+  .chat-popup {
+    width: 90%;          /* almost full width */
+    height: 70%;         /* reduce height for mobile */
+    bottom: 10px;
+    right: 5%;           /* center-ish */
+    border-radius: 8px;
+  }
+
+  .chat-screen {
+    height: 100%;        /* fill popup */
+  }
+
+  .chat-btn-floating {
+    width: 60px;
+    height: 60px;
+    font-size: 14px;
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .chat-footer input {
+    font-size: 13px;
+  }
+
+  .chat-footer button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .chat-bubble {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .model-selector {
+    padding: 6px;
+  }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 480px) {
+  .chat-popup {
+    width: 95%;
+    height: 65%;
+    bottom: 5px;
+    right: 2.5%;
+  }
+
+  .chat-btn-floating {
+    width: 72px;
+    height: 72px;
+    font-size: 15px;
+  }
+
+  .chat-footer input {
+    font-size: 12px;
+  }
+
+  .chat-footer button {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .chat-bubble {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}

@@ -2,6 +2,7 @@ import React from "react";
 import "../css/inputComponentcss.css";
 
 type InputProps = {
+  id?: string; // lowercase
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -9,6 +10,7 @@ type InputProps = {
 };
 
 const Input: React.FC<InputProps> = ({
+  id,
   placeholder,
   value,
   onChange,
@@ -21,6 +23,7 @@ const Input: React.FC<InputProps> = ({
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      id={id} // now matches HTML attribute
     />
   );
 };
