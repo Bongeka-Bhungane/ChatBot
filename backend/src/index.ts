@@ -13,6 +13,11 @@ const upload = multer({ dest: "src/uploads/" });
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "static")));
+``;
+
+app.use("/", express.static(path.join(__dirname, "static")));
 
 // Endpoint
 app.post("/api/chat", chatWithModel);
