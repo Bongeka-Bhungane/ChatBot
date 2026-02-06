@@ -57,33 +57,34 @@ export const getAllDocs = async (_req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
-// export const getDocById = async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params;
-//     const doc = await docService.fetchDocById(id as string);
-//     res.json(doc);
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+export const getDocById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const doc = await docService.fetchDocById(id as string);
+    res.json(doc);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-// export const updateDoc = async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params;
-//     const metadata = req.body;
-//     const updatedDoc = await docService.updateDocMetadata(id as string, metadata);
-//     res.json(updatedDoc);
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+export const updateDoc = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const metadata = req.body;
+    const updatedDoc = await docService.updateDocMetadata(id as string, metadata);
+    res.json(updatedDoc);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-// export const deleteDoc = async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params
-//     const { storage_path } = req.query; // Passed as query param
-//     await docService.removeDoc(id as string, storage_path as string);
-//     res.json({ message: "Document deleted successfully" });
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
+export const deleteDoc = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const { storage_path } = req.query; // Passed as query param
+    await docService.removeDoc(id as string, storage_path as string);
+    res.json({ message: "Document deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
