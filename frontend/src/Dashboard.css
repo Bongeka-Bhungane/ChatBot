@@ -161,7 +161,7 @@
 }
 
 .submit-btn:hover {
-  opacity: 0.9;
+  background: #17cc00;
 }
 
 .close-btn {
@@ -184,16 +184,37 @@
 }
 
 .profile-card {
-  background: white;
-  width: 420px;
-  padding: 2.5rem 2rem;
-  border-radius: 14px;
-  text-align: center;
+  position: relative; /* Needed for absolute positioning inside */
+  background-color: #ffffff; /* Example card background */
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+  margin: 20px auto;
+  color: #0f3b48;
+  border: 2px solid #94C73D;
 }
+
+/* Back / Close button inside the card */
+.profile-card .close {
+  position: absolute; /* Position relative to .profile-card */
+  top: 15px;          /* Distance from the top */
+  right: 15px;        /* Distance from the right */
+  background: transparent;
+  border: none;
+  color: #0f3b48;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.profile-card .close:hover {
+  color: #00ff00; /* Lime green hover effect */
+}
+
 
 .profile-card h2 {
   margin-bottom: 2rem;
   color: #0f3b48;
+  display: flex;
 }
 
 .profile-card form {
@@ -212,4 +233,59 @@
 
 .profile-card input:focus {
   outline: 2px solid #94C73D;
+}
+
+.logout-btn {
+   margin-top: 1rem;
+  background: #94C73D;
+  border: none;
+  padding: 0.8rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #0f3b48;
+  font-size: 1rem;
+}
+
+.logout-btn:hover {
+  background: #17cc00;
+}
+
+.profile-view p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: black;
+  display: flex;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.cancel-btn {
+  margin-top: 1rem;
+  background: #94C73D;
+  border: none;
+  padding: 0.8rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #0f3b48;
+  font-size: 1rem;
+}
+.cancel-btn:hover {
+  background: #17cc00;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.close {
+
+
+
 }
