@@ -20,7 +20,7 @@ const initialState: AdminState = {
   error: null,
 };
 
-const API_URL = "http://localhost:5000/api/admins";
+const API_URL = "https://chatbot-w3ue.onrender.com/api/admins";
 
 // ------------------- ASYNC ACTIONS -------------------
 

@@ -16,7 +16,7 @@ interface DocumentState {
   error: string | null;
 }
 
-const BACKEND_URL = "http://localhost:5000"; // update if deployed
+const BACKEND_URL = "https://chatbot-w3ue.onrender.com"; // update if deployed
 
 const initialState: DocumentState = {
   documents: [],
