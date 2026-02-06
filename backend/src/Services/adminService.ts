@@ -34,6 +34,21 @@ export const addAdminDB = async (admin: Admin) => {
   return data;
 };
 
+export const loginAdminDB = async (email: string, password: string) => {
+  const { data, error } = await supabase
+    .from("Admins") 
+    .select("*")
+    .eq("email", email)
+    .eq("password", password)
+    .single();
+  if (error) {
+    console.error("Error logging in admin:", error);
+    return null;
+  }
+  return data;
+};
+
+
 export const updateAdminDB = async (id: string, admin: Partial<Admin>) => {
   const { data, error } = await supabase
     .from("Admins")

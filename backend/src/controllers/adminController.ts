@@ -57,6 +57,23 @@ export const updateAdmin = async (req: Request, res: Response) => {
   }
 };
 
+export const loginAdmin = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  try {
+    const admin = await getAdminsDB();
+    const foundAdmin = admin.find(
+      (adm) => adm.email === email && adm.password === password,
+    );
+    if (foundAdmin) {
+      res.json({ message: "Login successful", admin: foundAdmin });
+    } else {
+      res.status(401).json({ error: "Invalid email or password." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to login." });
+  }
+};
+
 export const deleteAdmin = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
