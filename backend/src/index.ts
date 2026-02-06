@@ -5,9 +5,7 @@ import multer from "multer";
 import { chatWithModel } from "./controllers/chatController";
 import path from "path";
 import adminRoutes from "./routes/adminRoutes";
-import bucketRouter from "./routes/bucketRouter";
 import docsRoutes from "./routes/docRoutes";
-
 
 dotenv.config();
 const app = express();
@@ -19,7 +17,6 @@ app.use(express.json());
 // Endpoint
 app.post("/api/chat", chatWithModel);
 app.use("/api/admins", adminRoutes);
-app.use("/api/bucket", bucketRouter);
 app.use("/api/documents", docsRoutes);
 
 const PORT = process.env.PORT || 5000;

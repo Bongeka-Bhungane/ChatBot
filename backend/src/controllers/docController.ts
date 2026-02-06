@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
-import * as docService from '../Services/docService';
+import { Request, Response } from "express";
+import * as docService from "../Services/docService";
+import { getFileUrlDB } from "../Services/docService";
 
 export const uploadDoc = async (req: Request, res: Response) => {
   try {
@@ -9,12 +10,43 @@ export const uploadDoc = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No file received by Multer" });
     }
 
-    const result = await docService.processDocumentUpload(files[0]);
+    console.log({ files });
+
+    const fileName = files[0].originalname; // Use original filename for storage
+
+    const existingFile = await getFileUrlDB(fileName);
+
+    if (existingFile) {
+      return res
+        .status(400)
+        .json({ error: "File with the same name already exists" });
+    }
+
+    const result = await docService.processDocumentUpload(files[0], fileName);
+
+    console.log(1000, result);
     res.status(201).json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getFileUrl = async (req: Request, res: Response) => {
+  try {
+    const filePath = req.params.filePath as string;
+    const url = await getFileUrlDB(filePath);
+
+    console.log("Retrieved URL:", url);
+
+    if (!url) {
+      return res.status(404).json({ error: "File not found." });
+    }
+    return res.status(200).json({ url });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get file URL." });
+  }
+};
+
 // export const getAllDocs = async (_req: Request, res: Response) => {
 //   try {
 //     const docs = await docService.fetchAllDocs();
