@@ -18,7 +18,7 @@ export default function Profile() {
   useEffect(() => {
     if (!storedAdmin?.id) return;
 
-    fetch(`http://localhost:5000/api/admins/${storedAdmin.id}`)
+    fetch(`https://chatbot-w3ue.onrender.com/api/admins/${storedAdmin.id}`)
       .then((res) => res.json())
       .then((data) => {
         setProfile({ ...data, password: "" });
@@ -40,7 +40,7 @@ export default function Profile() {
 
     if (profile.password) payload.password = profile.password;
 
-    const res = await fetch(`http://localhost:5000/api/admins/${profile.id}`, {
+    const res = await fetch(`https://chatbot-w3ue.onrender.com/api/admins/${profile.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

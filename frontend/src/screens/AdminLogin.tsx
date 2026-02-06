@@ -16,11 +16,14 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/admins/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "https://chatbot-w3ue.onrender.com/api/admins/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
 
       const data = await res.json();
 
