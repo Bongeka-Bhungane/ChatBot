@@ -14,13 +14,15 @@ export const uploadDoc = async (req: Request, res: Response) => {
 
     const fileName = files[0].originalname; // Use original filename for storage
 
-    const existingFile = await getFileUrlDB(fileName);
+    // const existingFile = await getFileUrlDB(fileName);
 
-    if (existingFile) {
-      return res
-        .status(400)
-        .json({ error: "File with the same name already exists" });
-    }
+    // console.log(4000, existingFile);
+
+    // if (existingFile) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "File with the same name already exists" });
+    // }
 
     const result = await docService.processDocumentUpload(files[0], fileName);
 
@@ -47,15 +49,14 @@ export const getFileUrl = async (req: Request, res: Response) => {
   }
 };
 
-// export const getAllDocs = async (_req: Request, res: Response) => {
-//   try {
-//     const docs = await docService.fetchAllDocs();
-//     res.json(docs);
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
+export const getAllDocs = async (_req: Request, res: Response) => {
+  try {
+    const docs = await docService.fetchAllDocsDB();
+    res.json(docs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 // export const getDocById = async (req: Request, res: Response) => {
 //   try {
 //     const { id } = req.params;

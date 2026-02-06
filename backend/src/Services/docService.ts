@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { Document } from "../types/document";
 const pdf = require("pdf-parse");
 
 const BUCKET_NAME = "Docs";
@@ -38,7 +39,7 @@ export const getFileUrlDB = (filePath: string): string => {
 export const processDocumentUpload = async (
   file: Express.Multer.File,
   fileName: string,
-) => {
+): Promise<Document> => {
   try {
     // 1. Resolve the function (Handling potential ESM/CommonJS wrapping)
     const pdfParser = typeof pdf === "function" ? pdf : pdf.default;
@@ -92,7 +93,7 @@ export const processDocumentUpload = async (
 /**
  * Fetch all documents ordered by creation date
  */
-export const fetchAllDocs = async () => {
+export const fetchAllDocsDB = async (): Promise<Document[]> => {
   const { data, error } = await supabase
     .from("documents")
     .select("*")
@@ -105,7 +106,7 @@ export const fetchAllDocs = async () => {
 /**
  * Fetch a single document by ID
  */
-export const fetchDocById = async (id: string) => {
+export const fetchDocById = async (id: string): Promise<Document> => {
   const { data, error } = await supabase
     .from("documents")
     .select("*")
