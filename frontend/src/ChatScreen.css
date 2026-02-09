@@ -1,223 +1,247 @@
+/* MAIN SCREEN */
 .chat-screen {
   width: 100%;
   height: 92vh;
-  margin: auto;
-  background: #ffffff; /* white background like screenshot */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  background: #ffffff;
   overflow: hidden;
 }
 
-/* Chat Body */
+/* CHAT BODY */
 .chat-body {
   flex: 1;
-  width: 100%;
   padding: 14px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  
-  background: #f0f0f0; /* light grey area behind messages */
+  background: #f0f0f0;
 }
 
-/* Chat bubbles */
+/* ✅ EMPTY STATE (ChatGPT style) */
+.chat-empty-state {
+  flex: 1;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+  color: #111;
+}
+
+.empty-ai-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.chat-empty-state h2 {
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.chat-empty-state p {
+  margin: 0;
+  font-size: 16px;
+  color: #555;
+}
+
+/* BUBBLES */
 .chat-bubble {
   max-width: 80%;
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 14px;
-  line-height: 1.4;
- 
-
 }
 
 .chat-bubble.user {
   align-self: flex-end;
-  background: #94C73D; /* lime for user */
-  color: white
+  background: #94c73d;
+  color: #fff;
 }
 
 .chat-bubble.bot {
   align-self: flex-start;
-  background:#133F4C; /* dark green */
-  color: #ffffff; /* white text */
+  background: #133f4c;
+  color: #fff;
 }
 
-/* Chat Footer */
-.chat-footer {
+/* THINKING */
+.thinking {
   display: flex;
   align-items: center;
-  padding: 12px;
-  gap: 10px;
-  background: #d9d9d9; /* grey background like screenshot */
+  gap: 8px;
+  opacity: 0.85;
 }
 
-.chat-footer input {
+.dots::after {
+  content: "";
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  33% {
+    content: ".";
+  }
+  66% {
+    content: "..";
+  }
+  100% {
+    content: "...";
+  }
+}
+
+/* RESPONSE TIME */
+.response-time {
+  display: block;
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* FOOTER */
+.chat-footer {
+  padding: 14px;
+  background: #d9d9d9;
+  border-top: 1px solid #ccc;
+}
+
+/* === Gemini-like input pill === */
+.chat-input-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d7d7d7;
+  border-radius: 999px;
+  padding: 10px 12px 10px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.chat-input-pill.disabled {
+  opacity: 0.75;
+}
+
+.chat-input-pill input {
   flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #cccccc;
-  background: #e5e5e5; /* grey input */
+  border: none;
+  outline: none;
+  background: transparent;
   font-size: 14px;
+  padding: 4px 0;
 }
 
-.chat-footer button {
-  background: #94C73D; /* lime button */
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: #000;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 16px;
+/* right side inside pill */
+.pill-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+/* ✅ MODEL dropdown container (your code uses .model-selector) */
 .model-selector {
-    display: flex;
-    justify-content: end;
-    padding: 8px;
-    background: #d9d9d9; /* grey background like screenshot */
+  display: flex;
+  align-items: center;
 }
 
-
-/* Floating Chat Button */
-.chat-btn-floating {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #94C73D; /* lime */
-  color: #133F4C; /* dark green */
-  border: none;
-  border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  font-size: 16px;
-  font-weight: bold;
+/* If your ModelDropdown renders a button/select, style it */
+.model-selector select,
+.model-selector button {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 13px;
   cursor: pointer;
-  z-index: 1000;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #111;
 }
 
-.chat-btn-floating:hover {
-  background: #91c100;
+.model-selector button:hover,
+.model-selector select:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
 }
 
-/* Chat Popup */
+/* SEND icon button */
+.send-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: #133f4c;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.send-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* HEADER */
 .chat-popup {
   position: fixed;
   bottom: 20px;
   right: 20px;
   width: 570px;
   height: 500px;
-  background: #133F4C; /* dark green */
-  border: 2px solid #648E3C; /* lime */
+  background: #133f4c;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   z-index: 1000;
 }
 
-/* Chat Header */
 .chat-header {
-  background: #133F4C; /* dark green */
-  color: #ffffff;
   padding: 0.8rem 1rem;
+  background: #133f4c;
+  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: bold;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+}
 
+.chat-header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 .chat-close-btn {
-  background: #648E3C; /* lime */
-  color: #133F4C; /* dark green */
+  background: #648e3c;
   border: none;
   border-radius: 50%;
   width: 25px;
   height: 25px;
-  font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.chat-close-btn:hover {
-  background: #91c100;
-}
-
-/* Media Query for Chat Popup - Responsive */
-@media (max-width: 768px) {
-  .chat-popup {
-    width: 90%;          /* almost full width */
-    height: 70%;         /* reduce height for mobile */
-    bottom: 10px;
-    right: 5%;           /* center-ish */
-    border-radius: 8px;
-  }
-
-  .chat-screen {
-    height: 100%;        /* fill popup */
-  }
-
-  .chat-btn-floating {
-    width: 60px;
-    height: 60px;
-    font-size: 14px;
-    bottom: 15px;
-    right: 15px;
-  }
-
-  .chat-footer input {
-    font-size: 13px;
-  }
-
-  .chat-footer button {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
-  .chat-bubble {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-
-  .model-selector {
-    padding: 6px;
-  }
-}
-
-/* Extra small devices (phones) */
-@media (max-width: 480px) {
-  .chat-popup {
-    width: 95%;
-    height: 65%;
-    bottom: 5px;
-    right: 2.5%;
-  }
-
-  .chat-btn-floating {
-    width: 72px;
-    height: 72px;
-    font-size: 15px;
-  }
-
-  .chat-footer input {
-    font-size: 12px;
-  }
-
-  .chat-footer button {
-    font-size: 13px;
-    padding: 6px 10px;
-  }
-
-  .chat-bubble {
-    font-size: 12px;
-    padding: 6px 8px;
-  }
+/* FLOATING BUTTON */
+.chat-btn-floating {
+  position: fixed;
+  bottom: 70px;
+  right: 70px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #0f3b48;
+  border: none;
+  cursor: pointer;
 }

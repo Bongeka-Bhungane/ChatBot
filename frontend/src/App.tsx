@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ChatScreen from "./components/ChatScreen";
 import HeroSlider from "./components/HeroSlider";
 import AdminLogin from "./screens/AdminLogin"; // make sure this path is correct
@@ -11,7 +11,7 @@ export default function App() {
   return (
     <Router>
       <div className="app">
-      
+        {/* Navbar */}
 
         {/* Routes */}
         <Routes>

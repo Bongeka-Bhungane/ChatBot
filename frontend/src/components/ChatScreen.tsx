@@ -1,84 +1,163 @@
-import { useState } from "react";
-import ModelDropdown, { type ChatModel } from "../components/ModelDropdown";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FiSettings, FiSend } from "react-icons/fi";
+import ModelDropdown from "../components/ModelDropdown";
+import { type Chat, type ChatModel } from "../types/Chat";
 import "../ChatScreen.css";
+import chatIcon from "../assets/Mlab-imgs/favicon.ico";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../redux/store";
+import { sendChat } from "../redux/chatSlice";
 
 type Message = {
-  id: number;
   sender: "user" | "bot";
   text: string;
 };
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, sender: "bot", text: "Hello 👋 How can I help you today?" },
+    { sender: "bot", text: "Hello  How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
-  const [model, setModel] = useState<ChatModel>("GPT-4");
-  const [isOpen, setIsOpen] = useState(false); // popup state
+  const [model, setModel] = useState<ChatModel>("llama");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const { currentChat, chats } = useSelector((state: RootState) => state.chats); // Placeholder for future chat-related state
+  const dispatch = useDispatch<AppDispatch>(); // Placeholder for future dispatching of chat actions
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (currentChat) {
+        const botMsg: Message = {
+          sender: "bot",
+          text: currentChat.answer,
+        };
+        return [...prev, botMsg];
+      }
+      return prev;
+    });
+    setIsThinking(false);
+  }, [currentChat, chats]); // Placeholder for future side effects related to chat state changes
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isThinking) return;
 
-    const userMsg: Message = {
-      id: Date.now(),
-      sender: "user",
-      text: input,
+    const payload: Chat = {
+      query: input.trim(),
+      modelType: model,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { sender: "user", text: input.trim() }]);
     setInput("");
+    setIsThinking(true);
+    // call thunk to send chat to backend
+    dispatch(sendChat(payload));
+  }; //  ChatGPT-style "first open" empty state:
+  // show centered greeting ONLY when there are no user messages yet
 
-    setTimeout(() => {
-      const botMsg: Message = {
-        id: Date.now() + 1,
-        sender: "bot",
-        text: `(${model}) AI response placeholder...`,
-      };
-      setMessages((prev) => [...prev, botMsg]);
-    }, 700);
-  };
+  const isEmptyState = messages.every((m) => m.sender !== "user");
 
   return (
     <>
-      {/* Chat Button (to open popup) */}
       {!isOpen && (
         <button className="chat-btn-floating" onClick={() => setIsOpen(true)}>
-          💬 
+          <img src={chatIcon} alt="Chat" width={40} height={40} />
         </button>
       )}
 
-      {/* Chat Popup */}
       {isOpen && (
         <div className="chat-popup">
+          {/* HEADER */}
+
           <div className="chat-header">
-            <span>Chatbot</span>
-            <button className="chat-close-btn" onClick={() => setIsOpen(false)}>
-              ✖
-            </button>
+            <span>Tribal Librarian</span>
+
+            <div className="chat-header-right">
+              <button
+                className="nav-btn"
+                onClick={() => navigate("/admin")}
+                title="Admin Settings"
+              >
+                <FiSettings size={18} />
+              </button>
+
+              <button
+                className="chat-close-btn"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="close-icon">✕</span>
+              </button>
+            </div>
           </div>
+          {/* BODY */}
 
           <div className="chat-screen">
             <div className="chat-body">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`chat-bubble ${msg.sender}`}>
-                  {msg.text}
+              {isEmptyState ? (
+                <div className="chat-empty-state">
+                  <img src={chatIcon} alt="AI" className="empty-ai-icon" />
+                  <h2>Hi </h2>
+                  <p>How can I help you today?</p>
                 </div>
-              ))}
+              ) : (
+                <>
+                  {messages.map((ms, index) => (
+                    <div key={index} className={`chat-bubble ${ms.sender}`}>
+                      <div>{ms.text}</div>
+
+                      {ms.sender === "bot" && (
+                        <span className="response-time">Responded in {0}s</span>
+                      )}
+                    </div>
+                  ))}
+
+                  {isThinking && (
+                    <div className="chat-bubble bot thinking">
+                      <img src={chatIcon} alt="AI" width={18} />
+
+                      <span>
+                        Thinking
+                        <span className="dots"></span>
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
+            {/* INPUT (Gemini-style pill) */}
 
             <div className="chat-footer">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              />
-              <button onClick={handleSend}>➤</button>
-            </div>
+              <div
+                className={`chat-input-pill ${isThinking ? "disabled" : ""}`}
+              >
+                <input
+                  type="text"
+                  placeholder="Ask Tribal Librarian…"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  disabled={isThinking}
+                />
+                <div className="pill-right">
+                  {/* Model Dropdown */}
 
-            <div className="model-selector">
-              <ModelDropdown model={model} setModel={setModel} />
+                  <div className="model-selector">
+                    <ModelDropdown model={model} setModel={setModel} />
+                  </div>
+                  {/* Send icon */}
+
+                  <button
+                    className="send-icon-btn"
+                    onClick={handleSend}
+                    disabled={!input.trim() || isThinking}
+                    aria-label="Send message"
+                    title="Send"
+                  >
+                    <FiSend size={18} />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
