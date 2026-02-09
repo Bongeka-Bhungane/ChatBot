@@ -1,7 +1,6 @@
 // src/components/ModelDropdown.tsx
 import "../dropdown.css";
-
-export type ChatModel = "GPT-4" | "Claude" | "Gemini" | "Local";
+import { Models, type ChatModel } from "../types/Chat";
 
 type ModelDropdownProps = {
   model: ChatModel;
@@ -21,10 +20,11 @@ export default function ModelDropdown({
         value={model}
         onChange={(e) => setModel(e.target.value as ChatModel)}
       >
-        <option value="GPT-4">GPT-4</option>
-        <option value="Claude">Claude</option>
-        <option value="Gemini">Gemini</option>
-        <option value="Local">Local Model</option>
+        {Models.map((model) => (
+          <option key={model} value={model}>
+            {model.charAt(0).toUpperCase() + model.slice(1)}
+          </option>
+        ))}
       </select>
 
       {onClose && (
