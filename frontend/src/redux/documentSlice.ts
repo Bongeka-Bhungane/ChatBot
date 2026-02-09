@@ -29,7 +29,7 @@ export const fetchDocuments = createAsyncThunk(
   "documents/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/documents/all`);
+      const res = await fetch(`${BACKEND_URL}/api/documents`);
       if (!res.ok) {
         const text = await res.text();
         return rejectWithValue(text);
