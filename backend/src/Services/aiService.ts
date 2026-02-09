@@ -39,6 +39,31 @@ export const getModel = (modelName: string) => {
           baseURL: "https://openrouter.ai/api/v1",
         },
       });
+    case "trinity":
+      if (!process.env.TRINITY_API_KEY) {
+        throw new Error("TRINITY_API_KEY is not configured");
+      }
+      return new ChatOpenAI({
+        apiKey: process.env.TRINITY_API_KEY,
+        modelName: "arcee-ai/trinity-mini:free",
+        openAIApiKey: process.env.TRINITY_API_KEY,
+        configuration: {
+          baseURL: "https://openrouter.ai/api/v1",
+        },
+      });
+
+      case "nemotron":
+        if (!process.env.NEMOTRON_API_KEY) {
+          throw new Error("NEMOTRON_API_KEY is not configured");
+        }
+        return new ChatOpenAI({
+          apiKey: process.env.NEMOTRON_API_KEY,
+          modelName: "nvidia/nemotron-3-nano-30b-a3b:free",
+          openAIApiKey: process.env.NEMOTRON_API_KEY,
+          configuration: {
+            baseURL: "https://openrouter.ai/api/v1",
+          },
+        });
 
     default:
       throw new Error("Invalid model selected");
