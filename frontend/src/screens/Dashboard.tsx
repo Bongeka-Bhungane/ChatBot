@@ -9,8 +9,9 @@ import {
   fetchDocuments,
   uploadDocument,
   deleteDocument,
- type Document,
+  type Document,
 } from "../redux/documentSlice";
+import { useNavigate } from "react-router-dom"; // ✅ add
 
 const stats = [
   { title: "Total Queries", value: "12,430" },
@@ -22,6 +23,7 @@ type Page = "dashboard" | "profile";
 
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate(); // ✅ add
 
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showDocModal, setShowDocModal] = useState(false);
@@ -37,14 +39,12 @@ export default function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Redux state
   const documents = useSelector(
     (state: RootState) => state.documents.documents,
   );
   const loading = useSelector((state: RootState) => state.documents.loading);
   const error = useSelector((state: RootState) => state.documents.error);
 
-  // Fetch documents on load
   useEffect(() => {
     dispatch(fetchDocuments());
   }, [dispatch]);
@@ -106,9 +106,12 @@ export default function Dashboard() {
       <aside className="sidebar">
         <h2>Admin Dashboard</h2>
         <nav>
-          <button onClick={() => setShowAdminModal(true)}>Add Admin</button>
           <button onClick={() => setPage("profile")}>Profile</button>
           <button onClick={() => setShowDocModal(true)}>Add Document</button>
+
+          {/* ✅ Admin List goes to AdminsPage route */}
+          <button onClick={() => navigate("/admins-list")}>Admin List</button>
+
           <button>FAQ</button>
         </nav>
       </aside>
@@ -117,7 +120,6 @@ export default function Dashboard() {
       <main className="dashboard-main">
         {page === "dashboard" && (
           <>
-            {/* Stats */}
             <div className="stats-grid">
               {stats.map((stat, i) => (
                 <div key={i} className="stat-card">
@@ -127,7 +129,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Documents */}
             <div className="documents-list">
               {loading && <p>Loading documents...</p>}
               {error && <p style={{ color: "red" }}>{error}</p>}
@@ -151,7 +152,7 @@ export default function Dashboard() {
         {page === "profile" && <Profile />}
       </main>
 
-      {/* ADD ADMIN MODAL */}
+      {/* MODALS unchanged... */}
       {showAdminModal && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -195,7 +196,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ADD DOCUMENT MODAL */}
       {showDocModal && (
         <div className="modal-overlay">
           <div className="modal-card">
