@@ -1,0 +1,39 @@
+.model-dropdown-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.model-dropdown {
+  background: #133F4C;        /* dark green */
+  border: 1px solid #648E3C;  /* lime border */
+  color: #ffffff;              /* white text */
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Close button inside dropdown */
+.dropdown-close-btn {
+  background: #073F4E;         /* dark green to match dropdown */
+  border: 1px solid #a3d900;   /* lime border */
+  color: #ffffff;               /* white text */
+  border-radius: 50%;
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-close-btn:hover {
+  background: #a3d900;          /* lime background on hover */
+  color: #073F4E;               /* dark text on hover */
+}
+
+
