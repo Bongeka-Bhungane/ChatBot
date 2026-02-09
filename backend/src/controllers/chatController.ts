@@ -23,10 +23,10 @@ export const chatWithModel = async (req: Request, res: Response) => {
     // const { appropriate, inScope, answerInContext, sources, answer } =
     //   JSON.parse(response.content as string);
 
-    if (!inScope || !appropriate) {
+    if (!inScope || !answerInContext) {
       res.json({
         answer:
-          "Your question is either inappropriate or out of scope. I am referring you to a facilitator for further assistance.",
+          "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance.",
       });
     }
 

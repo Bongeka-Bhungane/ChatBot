@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeTribe Backend | API Documentation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --text: #1e293b;
+        --get: #10b981;
+        --post: #f59e0b;
+        --put: #3b82f6;
+        --delete: #ef4444;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 2rem;
+        margin: 0;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .section {
+        background: var(--card);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+        margin-top: 0;
+      }
+      .route {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+      }
+      .route:last-child {
+        border: none;
+      }
+      .method {
+        width: 70px;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-align: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 0.75rem;
+      }
+      .GET {
+        background: var(--get);
+      }
+      .POST {
+        background: var(--post);
+      }
+      .PUT {
+        background: var(--put);
+      }
+      .DELETE {
+        background: var(--delete);
+      }
+      .path {
+        font-weight: 500;
+        flex-grow: 1;
+      }
+      .desc {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>CodeTribe Backend</h1>
+        <p>API Endpoint Documentation & Overview</p>
+      </header>
+
+      <div class="section">
+        <h2>Admin Management (/api/admins)</h2>
+        <div class="route">
+          <span class="method GET">GET</span><span class="path">/</span
+          ><span class="desc">Get All Admins</span>
+        </div>
+        <div class="route">
+          <span class="method GET">GET</span><span class="path">/:id</span
+          ><span class="desc">Get Admin by ID</span>
+        </div>
+        <div class="route">
+          <span class="method POST">POST</span
+          ><span class="path">/register</span
+          ><span class="desc">Add New Admin</span>
+        </div>
+        <div class="route">
+          <span class="method POST">POST</span><span class="path">/login</span
+          ><span class="desc">Admin Authentication</span>
+        </div>
+        <div class="route">
+          <span class="method PUT">PUT</span><span class="path">/:id</span
+          ><span class="desc">Update Admin Details</span>
+        </div>
+        <div class="route">
+          <span class="method DELETE">DELETE</span><span class="path">/:id</span
+          ><span class="desc">Remove Admin</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Documents (/api/documents)</h2>
+        <div class="route">
+          <span class="method POST">POST</span><span class="path">/upload</span
+          ><span class="desc">Upload PDF/Docs (Multer)</span>
+        </div>
+        <div class="route">
+          <span class="method GET">GET</span><span class="path">/all</span
+          ><span class="desc">List All Document Metadata</span>
+        </div>
+        <div class="route">
+          <span class="method GET">GET</span
+          ><span class="path">/file/:filePath</span
+          ><span class="desc">Get Secure Download URL</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>AI Chat (/api/chat)</h2>
+        <div class="route">
+          <span class="method POST">POST</span><span class="path">/</span
+          ><span class="desc">Chat with Gemini Model</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
