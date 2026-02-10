@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { getModel } from "../Services/aiService";
 import { fetchAllDocsDB } from "../Services/docService";
+import { performance } from "perf_hooks";
+import { formatDuration } from "../utils/time";
 
 export const chatWithModel = async (req: Request, res: Response) => {
   const { query, modelType } = req.body;
@@ -25,10 +27,15 @@ Note: Do not include sources if the question is inappropriate or out of scope. A
 
   try {
     const model = getModel(modelType);
+
+    const startTime = performance.now();
     const response = await model.invoke([
       ["system", systemPrompt],
       ["human", query],
     ]);
+
+    const endTime = performance.now();
+    const durationInMs = Math.round(endTime - startTime);
 
     const { appropriate, inScope, answerInContext } = JSON.parse(
       response.content as string,
@@ -43,6 +50,7 @@ Note: Do not include sources if the question is inappropriate or out of scope. A
       sources,
       answer,
       escalated: !inScope || !appropriate, // Escalate if not appropriate or out of scope
+      duration: formatDuration(durationInMs), // Include response time in milliseconds
     });
     return;
   } catch (error) {
