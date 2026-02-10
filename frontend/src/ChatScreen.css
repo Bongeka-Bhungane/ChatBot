@@ -6,6 +6,7 @@
   flex-direction: column;
   background: #ffffff;
   overflow: hidden;
+   box-shadow: 0 6px 18px rgba(3, 3, 3, 0.15);
 }
 
 /* CHAT BODY */
@@ -244,4 +245,5 @@
   background: #0f3b48;
   border: none;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(3, 3, 3, 0.15);
 }
