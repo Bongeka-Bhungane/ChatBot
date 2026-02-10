@@ -3,27 +3,28 @@ import { getModel } from "../Services/aiService";
 import { fetchAllDocsDB } from "../Services/docService";
 import { performance } from "perf_hooks";
 import { formatDuration } from "../utils/time";
+import { MODEL_TYPES } from "../types/modelType";
 
 export const chatWithModel = async (req: Request, res: Response) => {
   const { query, modelType } = req.body;
-
   const documentContext = await fetchAllDocsDB();
 
-  const systemPrompt = `You are the CodeTribe LMS Bot. Your behavior must strictly follow the provided logic flow: first, check for appropriateness; second, determine if the query is in-scope based on the provided documents; third, scan the documents for a valid response. Use these objects as your document context: ${JSON.stringify(documentContext)}.
+  const systemPrompt = `${MODEL_TYPES[modelType].systemPrompt}. 
+  MODEL_CATEGORY = ${MODEL_TYPES[modelType].category}
 
-Mandatory Response Requirements:
+Given the following document context: ${JSON.stringify(documentContext)}.
 
-Appropriateness Check (Algorithm): If the question is inappropriate, set "appropriate": 0, provide the reason in "answer", and do not scan further.
+1. Appropriateness Check (Algorithm): Is the question appropriate? If the question is not appropriate, set "appropriate": 0, provide the reason in "answer", and do not scan further.
 
-Scope Check (Algorithm): If the question is unrelated to the provided documents, set "inScope": 0.
+2. Scope Check (Algorithm): If the question is unrelated to the provided documents, set "inScope": 0, but only if MODEL_CATEGORY is not "Technical & Logical". Otherwise, set "inScope": 1.
 
-Context Scan (AI): Scan the documents. If a response is found, set "answerInContext": 1 and generate the response.
+3. Context Scan (AI): Scan the documents. If a response is found, set "answerInContext": 1 and generate the response else set "answerInContext": 0 and set "answer" to exactly: "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance. and suggest better model to answer the question if any in the list of models: ${JSON.stringify(MODEL_TYPES)}. e.g try using xyz for this and this." but only if MODEL_CATEGORY is not "Technical & Logical". Otherwise, set "answerInContext": 1.
 
-Escalation Path: If the question is in-scope but the answer is NOT found in the context, set "answerInContext": 0 and set "answer" to exactly: "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance."
+Format your output as a single JSON object: {"appropriate": 0/1, "inScope": 0/1, "answerInContext": 0/1, "sources": ["fileName.pdf"], "answer": "your string here", "escalated": 0/1,}
 
-Format your output as a single JSON object: {"appropriate": 0/1, "inScope": 0/1, "answerInContext": 0/1, "sources": ["fileName.pdf"], "answer": "your string here"}
+** Note: Do not include sources if the question is inappropriate or out of scope. Always reference the specific file name if an answer is provided. If sources are included also include them in your answer e.g ....(According to xyz.pdf)**
 
-Note: Do not include sources if the question is inappropriate or out of scope. Always reference the specific file name if an answer is provided.`;
+`;
 
   try {
     const model = getModel(modelType);
@@ -41,7 +42,9 @@ Note: Do not include sources if the question is inappropriate or out of scope. A
       response.content as string,
     );
 
-    const { sources, answer } = JSON.parse(response.content as string);
+    const { sources, answer, escalated, modelCategory } = JSON.parse(
+      response.content as string,
+    );
 
     res.json({
       appropriate,
@@ -49,7 +52,8 @@ Note: Do not include sources if the question is inappropriate or out of scope. A
       answerInContext,
       sources,
       answer,
-      escalated: !inScope || !appropriate, // Escalate if not appropriate or out of scope
+      escalated,
+      modelCategory,
       duration: formatDuration(durationInMs), // Include response time in milliseconds
     });
     return;
