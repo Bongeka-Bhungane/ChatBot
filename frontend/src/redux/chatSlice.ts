@@ -4,7 +4,7 @@ import axios from "axios";
 
 interface ChatState {
   chats: ChatResponse[];
-  currentChat: { answer: string } | null;
+  currentChat: ChatResponse | null;
   loading: boolean;
   error: string | null;
 }
@@ -17,6 +17,7 @@ const initialState: ChatState = {
 };
 
 const BASE_URL = "https://chatbot-w3ue.onrender.com/api/chat"; // update if deployed
+
 
 export const sendChat = createAsyncThunk(
   "chat/send",

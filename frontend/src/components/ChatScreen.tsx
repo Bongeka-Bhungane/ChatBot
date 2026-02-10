@@ -12,6 +12,7 @@ import { sendChat } from "../redux/chatSlice";
 type Message = {
   sender: "user" | "bot";
   text: string;
+  duration?: string; // Optional field to display response time for bot messages
 };
 
 export default function ChatScreen() {
@@ -19,7 +20,7 @@ export default function ChatScreen() {
     { sender: "bot", text: "Hello  How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
-  const [model, setModel] = useState<ChatModel>("llama");
+  const [model, setModel] = useState<ChatModel>("stepfun");
   const [isOpen, setIsOpen] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const { currentChat, chats } = useSelector((state: RootState) => state.chats); // Placeholder for future chat-related state
@@ -32,6 +33,7 @@ export default function ChatScreen() {
         const botMsg: Message = {
           sender: "bot",
           text: currentChat.answer,
+          duration: currentChat.duration, // Display response time if available
         };
         return [...prev, botMsg];
       }
@@ -107,7 +109,9 @@ export default function ChatScreen() {
                       <div>{ms.text}</div>
 
                       {ms.sender === "bot" && (
-                        <span className="response-time">Responded in {0}s</span>
+                        <span className="response-time">
+                          Responded in {ms.duration ? ms.duration : 0}
+                        </span>
                       )}
                     </div>
                   ))}

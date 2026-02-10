@@ -1,6 +1,6 @@
-export type ChatModel = "llama" | "GLM" | "stepfun" | "trinity" | "nemotron"  ;
+export type ChatModel = "stepfun" | "trinity" | "nemotron"  ;
 
-export const Models = ["llama", "GLM", "stepfun", "trinity", "nemotron"];
+export const Models = ["stepfun", "trinity", "nemotron"];
 
 export interface Chat {
   query: string;
@@ -9,4 +9,5 @@ export interface Chat {
 
 export interface ChatResponse {
   answer: string;
+  duration: string
 }
