@@ -73,7 +73,12 @@ export default function ChatScreen() {
           {/* HEADER */}
 
           <div className="chat-header">
-            <span>Tribal Librarian</span>
+            <div className="chat-header-left">
+              <span>Tribal Librarian</span>
+              <div className="model-btn">
+                <ModelDropdown model={model} setModel={setModel} />
+              </div>
+            </div>
 
             <div className="chat-header-right">
               <button
@@ -146,9 +151,6 @@ export default function ChatScreen() {
                 <div className="pill-right">
                   {/* Model Dropdown */}
 
-                  <div className="model-selector">
-                    <ModelDropdown model={model} setModel={setModel} />
-                  </div>
                   {/* Send icon */}
 
                   <button

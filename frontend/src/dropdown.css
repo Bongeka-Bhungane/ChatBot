@@ -13,7 +13,7 @@
   padding: 8px 12px;
   border-radius: 999px;
 
-  background: rgba(255, 255, 255, 0.08);
+  background: #94C73D;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #e5e7eb;
 
@@ -25,14 +25,11 @@
 }
 
 .model-dd-trigger:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: #658E43;
+
 }
 
-.model-dd-trigger:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
-}
+
 
 .model-dd-trigger-title {
   font-weight: 600;
