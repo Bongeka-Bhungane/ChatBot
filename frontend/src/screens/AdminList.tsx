@@ -1,121 +1,3 @@
-// import { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import type { RootState, AppDispatch } from "../redux/store";
-// import { fetchAdmins, deleteAdmin, type Admin } from "../redux/adminSlice";
-// import { FiTrash2 } from "react-icons/fi";
-// import "../css/adminList.css";
-
-// export default function AdminsList() {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const { admins, loading, error } = useSelector(
-//     (state: RootState) => state.admins,
-//   );
-
-//   useEffect(() => {
-//     dispatch(fetchAdmins());
-//   }, [dispatch]);
-
-//   const handleDelete = (admin: Admin) => {
-//     if (!admin.id) {
-//       alert("Cannot delete: Admin id is missing.");
-//       return;
-//     }
-
-//     const ok = window.confirm(`Delete admin "${admin.fullName}"?`);
-//     if (!ok) return;
-
-//     dispatch(deleteAdmin(admin.id));
-//   };
-
-//   return (
-//     <div className="admins-page">
-//       <div className="admins-header">
-//         <h2>Admins</h2>
-//         <p>Existing admins in the system</p>
-//       </div>
-
-//       {error && <div className="admins-error">{error}</div>}
-
-//       <div className="admins-card">
-//         <div className="admins-table-head">
-//           <span>Full Name</span>
-//           <span>Email</span>
-//           <span>Created</span>
-//           <span className="admins-actions-col">Actions</span>
-//         </div>
-
-//         {loading ? (
-//           <div className="admins-loading">Loading admins…</div>
-//         ) : admins.length === 0 ? (
-//           <div className="admins-empty">No admins found.</div>
-//         ) : (
-//           <div className="admins-table-body">
-//             {admins.map((admin) => (
-//               <div key={admin.id ?? admin.email} className="admins-row">
-//                 <span className="admins-name">{admin.fullName}</span>
-//                 <span className="admins-email">{admin.email}</span>
-//                 <span className="admins-date">
-//                   {admin.createdAt
-//                     ? new Date(admin.createdAt).toLocaleDateString()
-//                     : "—"}
-//                 </span>
-
-//                 <span className="admins-actions">
-//                   <button
-//                     className="admins-delete-btn"
-//                     onClick={() => handleDelete(admin)}
-//                     title="Delete admin"
-//                     aria-label={`Delete admin ${admin.fullName}`}
-//                   >
-//                     <FiTrash2 size={18} />
-//                   </button>
-//                 </span>
-//               </div>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../redux/store";
@@ -202,12 +84,13 @@ export default function AdminsList() {
       <aside className="sidebar">
         <h2>Admin Dashboard</h2>
         <nav>
-
           {/* If Profile is a route, navigate to it */}
           <button onClick={() => navigate("/dashboard")}>Dashboard</button>
 
           {/* if add document lives on dashboard, navigate there */}
           <button onClick={() => navigate("/profile")}>Profile</button>
+
+          <button onClick={() => navigate("/models")}>Manage Models</button>
 
           <button>FAQ</button>
         </nav>
