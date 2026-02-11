@@ -8,6 +8,7 @@ import chatIcon from "../assets/Mlab-imgs/favicon.ico";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../redux/store";
 import { sendChat } from "../redux/chatSlice";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 
 type Message = {
   sender: "user" | "bot";
@@ -112,8 +113,11 @@ export default function ChatScreen() {
                 <>
                   {messages.map((ms, index) => (
                     <div key={index} className={`chat-bubble ${ms.sender}`}>
-                      <div>{ms.text}</div>
+                      <div>
+                        <MarkdownPreview source={ms.text} />
+                      </div>
 
+                    
                       {ms.sender === "bot" && (
                         <span className="response-time">
                           Responded in {ms.duration ? ms.duration : 0}
