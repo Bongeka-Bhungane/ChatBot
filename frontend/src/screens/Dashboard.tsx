@@ -111,7 +111,7 @@ export default function Dashboard() {
 
           {/* ✅ Admin List goes to AdminsPage route */}
           <button onClick={() => navigate("/admins-list")}>Admin List</button>
-
+          <button onClick={() => navigate("/models")}>Manage Models</button>
           <button>FAQ</button>
         </nav>
       </aside>

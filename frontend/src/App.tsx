@@ -6,6 +6,7 @@ import Dashboard from "./screens/Dashboard"; // import the Dashboard component
 import "./App.css";
 import Profile from "./screens/Profile";
 import AdminList from "./screens/AdminList";
+import ModelsScreen from "./screens/ModelsScreen";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />{" "}
           <Route path="/profile" element={<Profile />} />
           <Route path="/admins-list" element={<AdminList />} />
+          <Route path="/models" element={<ModelsScreen />} />
           {/* dashboard route */}
           {/* other routes can go here */}
         </Routes>
