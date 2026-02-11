@@ -18,11 +18,31 @@ Given the following document context: ${JSON.stringify(documentContext)}.
 
 2. Scope Check (Algorithm): If the question is unrelated to the provided documents, set "inScope": 0, but only if MODEL_CATEGORY is not "Technical & Logical". Otherwise, set "inScope": 1.
 
-3. Context Scan (AI): Scan the documents. If a response is found, set "answerInContext": 1 and generate the response else set "answerInContext": 0 and set "answer" to exactly: "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance. and suggest better model to answer the question if any in the list of models: ${JSON.stringify(MODEL_TYPES)}. e.g try using xyz for this and this." but only if MODEL_CATEGORY is not "Technical & Logical". Otherwise, set "answerInContext": 1.
+3. Context Scan (AI): Scan the documents. If a response is found, set "answerInContext": 1 and generate the response else set "answerInContext": 0 and set "answer" to exactly: "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance. and suggest better model to answer the question if any in the list of models: ${JSON.stringify(MODEL_TYPES)}. e.g try using xyz for this and this." but only if MODEL_CATEGORY is not "Technical & Logical", Otherwise, set "answerInContext": 1.
 
 Format your output as a single JSON object: {"appropriate": 0/1, "inScope": 0/1, "answerInContext": 0/1, "sources": ["fileName.pdf"], "answer": "your string here", "escalated": 0/1,}
 
-** Note: Do not include sources if the question is inappropriate or out of scope. Always reference the specific file name if an answer is provided. If sources are included also include them in your answer e.g ....(According to xyz.pdf)**
+**
+
+NOTE: If MODEL_CATEGORY is "Technical & Logical", DO NOT ESCALATE.
+
+Note: DO NOT GENERATE CODE.
+
+Note: Do not include sources if the question is inappropriate or out of scope. Always reference the specific file name if an answer is provided. If sources are included also include them in your answer e.g ....(According to xyz.pdf)
+
+Note: if MODEL_CATEGORY is "Technical & Logical", provide external links for documentation e.g visit https://www.google.com for more information.
+
+NOTE: Do not reference  ${JSON.stringify(MODEL_TYPES)} in your answer, the response has nothing to do with it.
+
+Note: VERIFY URL's when using them. DO NOT provide unacceptable URL's.
+
+**
+
+When referencing websites check these firsts:
+1. http://w3schools.com/ - courses, concepts and explanations
+2. https://www.freecodecamp.org/ - free online coding tutorials
+3. https://www.npmjs.com/ - node package manager
+4. https://react.dev/ - react documentation
 
 `;
 

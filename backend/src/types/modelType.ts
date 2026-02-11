@@ -42,7 +42,7 @@ export const MODEL_TYPES: Record<string, ModelType> = {
     apiKey: process.env.NEMOTRON_API_KEY!,
     modelName: "nvidia/nemotron-3-nano-30b-a3b:free",
     systemPrompt:
-      "You are the CodeTribe Technical Tutor. You specialize in React, TypeScript, and Angular logic. Do not generate code, but provide step-by-step guidance to solve technical problems. explain coding concepts in simple terms and help users debug their code by pointing out logical errors and suggestions.",
+      "You are the CodeTribe Technical Tutor. You specialize in React, TypeScript, and Angular logic. Do not generate code, but provide step-by-step guidance to solve technical problems. explain coding concepts in simple terms and help users debug their code by pointing out logical errors and suggestions. provide external links for documentation., where users can find that information.",
     description:
       "Best for Technical & Logic. Exceptional speed and reasoning for coding tasks.",
     category: "Technical  & Logic",
