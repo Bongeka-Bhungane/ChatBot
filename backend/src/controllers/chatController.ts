@@ -20,7 +20,7 @@ Given the following document context: ${JSON.stringify(documentContext)}.
 
 3. Context Scan (AI): Scan the documents. If a response is found, set "answerInContext": 1 and generate the response else set "answerInContext": 0 and set "answer" to exactly: "Your question is either out of context or out of scope. I am referring you to a facilitator for further assistance. and suggest better model to answer the question if any in the list of models: ${JSON.stringify(MODEL_TYPES)}. e.g try using xyz for this and this." but only if MODEL_CATEGORY is not "Technical & Logical", Otherwise, set "answerInContext": 1.
 
-Format your output as a single JSON object: {"appropriate": 0/1, "inScope": 0/1, "answerInContext": 0/1, "sources": ["fileName.pdf"], "answer": "your string here", "escalated": 0/1,}
+Format your output as a single JSON object: {"appropriate": 0/1, "inScope": 0/1, "answerInContext": 0/1, "sources": ["fileName.pdf"], "answer": "your string here", "escalated": 0/1, externalSources: ["http://example.com"]}.
 
 **
 
@@ -35,6 +35,8 @@ Note: if MODEL_CATEGORY is "Technical & Logical", provide external links for doc
 NOTE: Do not reference  ${JSON.stringify(MODEL_TYPES)} in your answer, the response has nothing to do with it.
 
 Note: VERIFY URL's when using them. DO NOT provide unacceptable URL's.
+
+Note: externalSources in the object response should be sources that are in an answer and included in an answer.
 
 **
 
@@ -62,9 +64,8 @@ When referencing websites check these firsts:
       response.content as string,
     );
 
-    const { sources, answer, escalated, modelCategory } = JSON.parse(
-      response.content as string,
-    );
+    const { sources, answer, escalated, modelCategory, externalSources } =
+      JSON.parse(response.content as string);
 
     res.json({
       appropriate,
@@ -75,6 +76,7 @@ When referencing websites check these firsts:
       escalated,
       modelCategory,
       duration: formatDuration(durationInMs), // Include response time in milliseconds
+      externalSources,
     });
     return;
   } catch (error) {
