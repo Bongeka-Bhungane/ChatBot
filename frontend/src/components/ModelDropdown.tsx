@@ -67,7 +67,6 @@ export default function ModelDropdown({
       {/* Popover */}
       {open && (
         <div className="model-dd-popover" role="menu">
-          <div className="model-dd-header">Models</div>
 
           <div className="model-dd-list">
             {Models.map((m) => {

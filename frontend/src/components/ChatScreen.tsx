@@ -68,13 +68,14 @@ export default function ChatScreen() {
         </button>
       )}
 
-      {isOpen && (
-        <div className="chat-popup">
+   <div className={`chat-popup ${isOpen ? "open" : ""}`}>
+
           {/* HEADER */}
 
           <div className="chat-header">
             <div className="chat-header-left">
-              <span>Tribal Librarian</span>
+              <span className="model">Choose a model</span>
+
               <div className="model-btn">
                 <ModelDropdown model={model} setModel={setModel} />
               </div>
@@ -167,7 +168,6 @@ export default function ChatScreen() {
             </div>
           </div>
         </div>
-      )}
     </>
   );
 }

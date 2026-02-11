@@ -249,3 +249,26 @@
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(3, 3, 3, 0.15);
 }
+
+.model{
+  font-size: 13px;
+  color: #fff;
+}
+
+/* ================= SLIDE IN FROM LEFT ================= */
+
+.chat-popup {
+  transform: translateX(120%);   /* start OFF-SCREEN to the RIGHT */
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+
+/* when open */
+.chat-popup.open {
+  transform: translateX(0);      /* move INTO view */
+  opacity: 1;
+  pointer-events: auto;
+}
+
