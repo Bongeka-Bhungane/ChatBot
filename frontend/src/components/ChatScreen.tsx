@@ -69,109 +69,110 @@ export default function ChatScreen() {
         </button>
       )}
 
-   <div className={`chat-popup ${isOpen ? "open" : ""}`}>
+      <div className={`chat-popup ${isOpen ? "open" : ""}`}>
+        {/* HEADER */}
 
-          {/* HEADER */}
+        <div className="chat-header">
+          <div className="chat-header-left">
+            <span className="model">Choose a model</span>
 
-          <div className="chat-header">
-            <div className="chat-header-left">
-              <span className="model">Choose a model</span>
-
-              <div className="model-btn">
-                <ModelDropdown model={model} setModel={setModel} />
-              </div>
-            </div>
-
-            <div className="chat-header-right">
-              <button
-                className="nav-btn"
-                onClick={() => navigate("/admin")}
-                title="Admin Settings"
-              >
-                <FiSettings size={18} />
-              </button>
-
-              <button
-                className="chat-close-btn"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="close-icon">✕</span>
-              </button>
+            <div className="model-btn">
+              <ModelDropdown model={model} setModel={setModel} />
             </div>
           </div>
-          {/* BODY */}
 
-          <div className="chat-screen">
-            <div className="chat-body">
-              {isEmptyState ? (
-                <div className="chat-empty-state">
-                  <img src={chatIcon} alt="AI" className="empty-ai-icon" />
-                  <h2>Hi </h2>
-                  <p>How can I help you today?</p>
-                </div>
-              ) : (
-                <>
-                  {messages.map((ms, index) => (
-                    <div key={index} className={`chat-bubble ${ms.sender}`}>
-                      <div>
-                        <MarkdownPreview source={ms.text} />
-                      </div>
+          <div className="chat-header-right">
+            <button
+              className="nav-btn"
+              onClick={() => navigate("/admin")}
+              title="Admin Settings"
+            >
+              <FiSettings size={18} />
+            </button>
 
-                    
-                      {ms.sender === "bot" && (
-                        <span className="response-time">
-                          Responded in {ms.duration ? ms.duration : 0}
-                        </span>
-                      )}
+            <button className="chat-close-btn" onClick={() => setIsOpen(false)}>
+              <span className="close-icon">✕</span>
+            </button>
+          </div>
+        </div>
+        {/* BODY */}
+
+        <div className="chat-screen">
+          <div className="chat-body">
+            {isEmptyState ? (
+              <div className="chat-empty-state">
+                <img src={chatIcon} alt="AI" className="empty-ai-icon" />
+                <h2>Hi </h2>
+                <p>How can I help you today?</p>
+              </div>
+            ) : (
+              <>
+                {messages.map((ms, index) => (
+                  <div key={index} className={`chat-bubble ${ms.sender}`}>
+                    <div>
+                      <MarkdownPreview
+                        source={ms.text}
+                        style={{
+                          background: "transparent",
+                          color: "inherit", 
+                          padding: 0, 
+                          fontSize: "14px", 
+                        }}
+                      />
                     </div>
-                  ))}
 
-                  {isThinking && (
-                    <div className="chat-bubble bot thinking">
-                      <img src={chatIcon} alt="AI" width={18} />
-
-                      <span>
-                        Thinking
-                        <span className="dots"></span>
+                    {ms.sender === "bot" && (
+                      <span className="response-time">
+                        Responded in {ms.duration ? ms.duration : 0}
                       </span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-            {/* INPUT (Gemini-style pill) */}
+                    )}
+                  </div>
+                ))}
 
-            <div className="chat-footer">
-              <div
-                className={`chat-input-pill ${isThinking ? "disabled" : ""}`}
-              >
-                <input
-                  type="text"
-                  placeholder="Ask Tribal Librarian…"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  disabled={isThinking}
-                />
-                <div className="pill-right">
-                  {/* Model Dropdown */}
+                {isThinking && (
+                  <div className="chat-bubble bot thinking">
+                    <img src={chatIcon} alt="AI" width={18} />
 
-                  {/* Send icon */}
+                    <span>
+                      Thinking
+                      <span className="dots"></span>
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          {/* INPUT (Gemini-style pill) */}
 
-                  <button
-                    className="send-icon-btn"
-                    onClick={handleSend}
-                    disabled={!input.trim() || isThinking}
-                    aria-label="Send message"
-                    title="Send"
-                  >
-                    <FiSend size={18} />
-                  </button>
-                </div>
+          <div className="chat-footer">
+            <div className={`chat-input-pill ${isThinking ? "disabled" : ""}`}>
+              <input
+                type="text"
+                placeholder="Ask Tribal Librarian…"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                disabled={isThinking}
+              />
+              <div className="pill-right">
+                {/* Model Dropdown */}
+
+                {/* Send icon */}
+
+                <button
+                  className="send-icon-btn"
+                  onClick={handleSend}
+                  disabled={!input.trim() || isThinking}
+                  aria-label="Send message"
+                  title="Send"
+                >
+                  <FiSend size={18} />
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
     </>
   );
 }
