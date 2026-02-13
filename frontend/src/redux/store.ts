@@ -1,15 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
-import adminReducer from "../redux/adminSlice";
-import documentReducer from "../redux/documentSlice";
-import ChatReducer from "../redux/chatSlice";
+import adminsReducer from "./adminSlice";
+import documentsReducer from "./documentSlice";
+import chatsReducer from "./chatSlice";
+import modelsReducer from "./modelSlice"; // ✅ add this
 
 export const store = configureStore({
   reducer: {
-    admins: adminReducer,
-    documents: documentReducer,
-    chats: ChatReducer,
+    admins: adminsReducer,
+    documents: documentsReducer,
+    chats: chatsReducer,
+    models: modelsReducer, // ✅ add this
   },
 });
 
+// ✅ types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

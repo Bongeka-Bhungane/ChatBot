@@ -1,70 +1,98 @@
-import { useMemo, useState } from "react";
+// ModelScreen.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import "../css/modelScreen.css";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../redux/store";
+import {
+  fetchModels,
+  createModel,
+  updateModel,
+  deleteModel,
+  toggleModelHidden,
+  selectModels,
+  selectModelsLoading,
+  selectModelsError,
+  type ModelCategory,
+} from "../redux/modelSlice";
 
+/** ✅ Match your DB table */
 type ModelRow = {
-  id: string;
+  id?: string;
   name: string;
   apiKey: string;
+  fullName: string;
   systemPrompt: string;
-  description: string;
-  parameter: string; // keep as string so you can store JSON or "temperature=0.7"
-  createdAt: string; // ISO
-  updatedAt: string; // ISO
-  isHidden: boolean; // hide/unhide the model
-  isKeyVisible: boolean; // eye icon like passwords
+  category: ModelCategory;
+  createdAt?: string;
+  updatedAt?: string;
+
+  // optional (only if you have it in DB)
+  isHidden?: boolean;
 };
+
+/** UI-only (not saved to DB) */
+type ModelRowUi = ModelRow & { isKeyVisible?: boolean };
 
 type ModelFormState = {
   name: string;
+  fullName: string;
   apiKey: string;
+  category: ModelCategory;
   systemPrompt: string;
-  description: string;
-  parameter: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 const emptyForm: ModelFormState = {
   name: "",
+  fullName: "",
   apiKey: "",
+  category: "Navigation & Support",
   systemPrompt: "",
-  description: "",
-  parameter: "",
+  createdAt: "",
+  updatedAt: "",
 };
 
-function formatDate(dIso: string) {
+function formatDate(dIso?: string) {
+  if (!dIso) return "—";
   const d = new Date(dIso);
+  if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString();
 }
 
-function uid() {
-  return crypto?.randomUUID?.() ?? String(Date.now());
-}
-
 export default function ModelScreen() {
-  const [models, setModels] = useState<ModelRow[]>([
-    {
-      id: uid(),
-      name: "GPT-4o Mini",
-      apiKey: "sk-test-1234567890",
-      systemPrompt: "You are a helpful assistant.",
-      description: "Fast, cost-effective model for general tasks.",
-      parameter: "temperature=0.7; max_tokens=800",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isHidden: false,
-      isKeyVisible: false,
-    },
-  ]);
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const modelsFromStore = useSelector(selectModels) as unknown as ModelRow[];
+  const loading = useSelector(selectModelsLoading);
+  const error = useSelector(selectModelsError);
+
+  const [keyVisibility, setKeyVisibility] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ModelFormState>(emptyForm);
-  const navigate = useNavigate();
 
-  const modalTitle = useMemo(() => {
-    return mode === "add" ? "Add Model" : "Edit Model";
-  }, [mode]);
+  useEffect(() => {
+    dispatch(fetchModels());
+  }, [dispatch]);
+
+  const models: ModelRowUi[] = useMemo(() => {
+    return (modelsFromStore ?? []).map((m) => ({
+      ...m,
+      isKeyVisible: m.id ? Boolean(keyVisibility[m.id]) : false,
+    }));
+  }, [modelsFromStore, keyVisibility]);
+
+  const modalTitle = useMemo(
+    () => (mode === "add" ? "Add Model" : "Edit Model"),
+    [mode],
+  );
 
   const openAdd = () => {
     setMode("add");
@@ -73,15 +101,17 @@ export default function ModelScreen() {
     setModalOpen(true);
   };
 
-  const openEdit = (m: ModelRow) => {
+  const openEdit = (m: ModelRowUi) => {
     setMode("edit");
-    setEditingId(m.id);
+    setEditingId(m.id ?? null);
     setForm({
-      name: m.name,
-      apiKey: m.apiKey,
-      systemPrompt: m.systemPrompt,
-      description: m.description,
-      parameter: m.parameter,
+      name: m.name ?? "",
+      fullName: m.fullName ?? "",
+      apiKey: m.apiKey ?? "",
+      category: m.category ?? "Navigation & Support",
+      systemPrompt: m.systemPrompt ?? "",
+      createdAt: m.createdAt,
+      updatedAt: m.updatedAt,
     });
     setModalOpen(true);
   };
@@ -92,73 +122,88 @@ export default function ModelScreen() {
     setEditingId(null);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name.trim()) return alert("Model name is required.");
+    if (!form.name.trim()) return alert("Name is required.");
+    if (!form.fullName.trim()) return alert("Full name is required.");
     if (!form.apiKey.trim()) return alert("API key is required.");
     if (!form.systemPrompt.trim()) return alert("System prompt is required.");
 
-    const now = new Date().toISOString();
+    try {
+      if (mode === "add") {
+        await dispatch(
+          createModel({
+            name: form.name.trim(),
+            fullName: form.fullName.trim(),
+            apiKey: form.apiKey.trim(),
+            category: form.category,
+            systemPrompt: form.systemPrompt.trim(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as any),
+        ).unwrap();
 
-    if (mode === "add") {
-      const newRow: ModelRow = {
-        id: uid(),
-        name: form.name.trim(),
-        apiKey: form.apiKey.trim(),
-        systemPrompt: form.systemPrompt.trim(),
-        description: form.description.trim(),
-        parameter: form.parameter.trim(),
-        createdAt: now, // system determines date added
-        updatedAt: now,
-        isHidden: false,
-        isKeyVisible: false,
-      };
+        closeModal();
+        return;
+      }
 
-      setModels((prev) => [newRow, ...prev]);
+      if (!editingId) return;
+
+      await dispatch(
+        updateModel({
+          id: editingId,
+          changes: {
+            name: form.name.trim(),
+            fullName: form.fullName.trim(),
+            apiKey: form.apiKey.trim(),
+            category: form.category,
+            systemPrompt: form.systemPrompt.trim(),
+            createdAt: form.createdAt,
+            updatedAt: new Date().toISOString(),
+          },
+        } as any),
+      ).unwrap();
+
       closeModal();
-      return;
+    } catch (err: any) {
+      alert(err?.message ?? "Something went wrong.");
     }
-
-    // edit
-    if (!editingId) return;
-
-    setModels((prev) =>
-      prev.map((m) =>
-        m.id === editingId
-          ? {
-              ...m,
-              name: form.name.trim(),
-              apiKey: form.apiKey.trim(),
-              systemPrompt: form.systemPrompt.trim(),
-              description: form.description.trim(),
-              parameter: form.parameter.trim(),
-              updatedAt: now, // system determines edit date
-            }
-          : m,
-      ),
-    );
-    closeModal();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
     const ok = window.confirm("Delete this model? This cannot be undone.");
     if (!ok) return;
-    setModels((prev) => prev.filter((m) => m.id !== id));
+
+    try {
+      await dispatch(deleteModel(id)).unwrap();
+    } catch (err: any) {
+      alert(err?.message ?? "Failed to delete model.");
+    }
   };
 
-  const toggleHideModel = (id: string) => {
-    setModels((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isHidden: !m.isHidden } : m)),
-    );
+  const handleToggleHide = async (m: ModelRowUi) => {
+    if (!m.id) return;
+
+    try {
+      await dispatch(
+        toggleModelHidden({
+          id: m.id,
+          isHidden: !Boolean(m.isHidden),
+        }),
+      ).unwrap();
+    } catch (err: any) {
+      alert(
+        err?.message ??
+          "Failed to toggle visibility. Ensure PATCH route exists and DB has isHidden column.",
+      );
+    }
   };
 
-  const toggleKeyVisibility = (id: string) => {
-    setModels((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isKeyVisible: !m.isKeyVisible } : m,
-      ),
-    );
+  const toggleKeyVisibility = (id?: string) => {
+    if (!id) return;
+    setKeyVisibility((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const maskKey = (key: string) => {
@@ -169,22 +214,16 @@ export default function ModelScreen() {
 
   return (
     <div className="admin-layout">
-      {/* LEFT SIDEBAR (matches screenshot style) */}
       <aside className="sidebar">
         <nav>
           <div className="sidebar__title">Admin Dashboard</div>
-
-          {/* If Profile is a route, navigate to it */}
           <button onClick={() => navigate("/dashboard")}>Dashboard</button>
-
-          {/* if add document lives on dashboard, navigate there */}
           <button onClick={() => navigate("/profile")}>Profile</button>
           <button onClick={() => navigate("/admins-list")}>Admin List</button>
           <button onClick={() => navigate("/faqs")}>FAQ</button>
         </nav>
       </aside>
 
-      {/* MAIN */}
       <main className="content">
         <div className="page-top">
           <h1 className="page-title">Models</h1>
@@ -199,9 +238,11 @@ export default function ModelScreen() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Model Name</th>
+                  <th>Name</th>
+                  <th>Model Full Name</th>
                   <th>API Key</th>
-                  <th>Description</th>
+                  <th>Category</th>
+                  <th>System Prompt</th>
                   <th>Date Added</th>
                   <th>Last Edited</th>
                   <th className="th-right">Actions</th>
@@ -209,70 +250,100 @@ export default function ModelScreen() {
               </thead>
 
               <tbody>
-                {models.map((m) => (
-                  <tr key={m.id} className={m.isHidden ? "row-hidden" : ""}>
-                    <td className="td-strong">
-                      {m.name}
-                      {m.isHidden ? <span className="pill">Hidden</span> : null}
-                    </td>
-
-                    <td>
-                      <div className="key-cell">
-                        <span className="mono">
-                          {m.isKeyVisible ? m.apiKey : maskKey(m.apiKey)}
-                        </span>
-
-                        <button
-                          className="icon-btn"
-                          title={
-                            m.isKeyVisible ? "Hide API key" : "Show API key"
-                          }
-                          onClick={() => toggleKeyVisibility(m.id)}
-                          type="button"
-                        >
-                          {m.isKeyVisible ? <EyeOffIcon /> : <EyeIcon />}
-                        </button>
-                      </div>
-                    </td>
-
-                    <td className="td-muted clamp">{m.description || "—"}</td>
-                    <td>{formatDate(m.createdAt)}</td>
-                    <td>{formatDate(m.updatedAt)}</td>
-
-                    <td className="td-actions">
-                      <button
-                        className="icon-btn"
-                        title="Edit"
-                        onClick={() => openEdit(m)}
-                        type="button"
-                      >
-                        <EditIcon />
-                      </button>
-
-                      <button
-                        className="icon-btn"
-                        title={m.isHidden ? "Unhide model" : "Hide model"}
-                        onClick={() => toggleHideModel(m.id)}
-                        type="button"
-                      >
-                        {m.isHidden ? <EyeIcon /> : <EyeOffIcon />}
-                      </button>
-
-                      <button
-                        className="icon-btn icon-btn--danger"
-                        title="Delete"
-                        onClick={() => handleDelete(m.id)}
-                        type="button"
-                      >
-                        <TrashIcon />
-                      </button>
+                {loading ? (
+                  <tr>
+                    <td className="empty" colSpan={8}>
+                      Loading models...
                     </td>
                   </tr>
-                ))}
+                ) : null}
 
-                {models.length === 0 ? (
+                {!loading && error ? (
                   <tr>
-                    <td className="empty" colSpan={7}>
+                    <td className="empty" colSpan={8}>
+                      {error}
+                    </td>
+                  </tr>
+                ) : null}
+
+                {!loading && !error
+                  ? models.map((m) => (
+                      <tr key={m.id} className={m.isHidden ? "row-hidden" : ""}>
+                        <td className="td-strong">
+                          {m.name}
+                          {m.isHidden ? (
+                            <span className="pill">Hidden</span>
+                          ) : null}
+                        </td>
+
+                        <td className="td-muted">{m.fullName || "—"}</td>
+
+                        <td>
+                          <div className="key-cell">
+                            <span className="mono">
+                              {m.isKeyVisible ? m.apiKey : maskKey(m.apiKey)}
+                            </span>
+
+                            <button
+                              className="icon-btn"
+                              title={
+                                m.isKeyVisible ? "Hide API key" : "Show API key"
+                              }
+                              onClick={() => toggleKeyVisibility(m.id)}
+                              type="button"
+                            >
+                              {m.isKeyVisible ? <EyeOffIcon /> : <EyeIcon />}
+                            </button>
+                          </div>
+                        </td>
+
+                        <td className="td-muted">{m.category || "—"}</td>
+
+                        <td className="td-muted clamp">
+                          {m.systemPrompt || "—"}
+                        </td>
+
+                        <td>{formatDate(m.createdAt)}</td>
+                        <td>{formatDate(m.updatedAt)}</td>
+
+                        <td className="td-actions">
+                          <button
+                            className="icon-btn"
+                            title="Edit"
+                            onClick={() => openEdit(m)}
+                            type="button"
+                            disabled={!m.id}
+                          >
+                            <EditIcon />
+                          </button>
+
+                          <button
+                            className="icon-btn"
+                            title={m.isHidden ? "Unhide model" : "Hide model"}
+                            onClick={() => handleToggleHide(m)}
+                            type="button"
+                            disabled={!m.id}
+                          >
+                            {m.isHidden ? <EyeIcon /> : <EyeOffIcon />}
+                          </button>
+
+                          <button
+                            className="icon-btn icon-btn--danger"
+                            title="Delete"
+                            onClick={() => handleDelete(m.id)}
+                            type="button"
+                            disabled={!m.id}
+                          >
+                            <TrashIcon />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  : null}
+
+                {!loading && !error && models.length === 0 ? (
+                  <tr>
+                    <td className="empty" colSpan={8}>
                       No models yet. Click <b>Add Model</b>.
                     </td>
                   </tr>
@@ -306,14 +377,26 @@ export default function ModelScreen() {
               <form className="form" onSubmit={handleSave}>
                 <div className="form-grid">
                   <div className="field">
-                    <label>Model Name *</label>
+                    <label>Name *</label>
                     <input
                       className="input"
                       value={form.name}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, name: e.target.value }))
                       }
-                      placeholder="e.g. GPT-4o Mini"
+                      placeholder="e.g. Trinity"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>Model Name *</label>
+                    <input
+                      className="input"
+                      value={form.fullName}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, fullName: e.target.value }))
+                      }
+                      placeholder="e.g. arcee-ai/trinity-mini:free"
                     />
                   </div>
 
@@ -330,28 +413,42 @@ export default function ModelScreen() {
                   </div>
 
                   <div className="field field--full">
+                    <label>Category *</label>
+                    <select
+                      className="input"
+                      value={form.category}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          category: e.target.value as ModelCategory,
+                        }))
+                      }
+                    >
+                      <option value="Policy & Compliance">
+                        Policy & Compliance
+                      </option>
+                      <option value="Technical  & Logic">
+                        Technical & Logic
+                      </option>
+                      <option value="Navigation & Support">
+                        Navigation & Support
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="field field--full">
                     <label>System Prompt *</label>
                     <textarea
                       className="textarea"
                       value={form.systemPrompt}
                       onChange={(e) =>
-                        setForm((p) => ({ ...p, systemPrompt: e.target.value }))
+                        setForm((p) => ({
+                          ...p,
+                          systemPrompt: e.target.value,
+                        }))
                       }
                       placeholder="You are..."
                       rows={5}
-                    />
-                  </div>
-
-                  <div className="field field--full">
-                    <label>Description</label>
-                    <textarea
-                      className="textarea"
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, description: e.target.value }))
-                      }
-                      placeholder="Short description..."
-                      rows={3}
                     />
                   </div>
                 </div>
