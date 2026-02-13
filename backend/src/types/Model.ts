@@ -10,6 +10,6 @@ export interface Model {
   fullName: string;
   systemPrompt: string;
   category: ModelCategory;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
