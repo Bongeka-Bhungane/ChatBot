@@ -6,6 +6,7 @@ import { chatWithModel } from "./controllers/chatController";
 import path from "path";
 import adminRoutes from "./routes/adminRoutes";
 import docsRoutes from "./routes/docRoutes";
+import modelRoutes from "./routes/modelRoutes";
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.use("/", express.static(path.join(__dirname, "static")));
 app.post("/api/chat", chatWithModel);
 app.use("/api/admins", adminRoutes);
 app.use("/api/documents", docsRoutes);
+app.use("/api/models", modelRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
