@@ -14,9 +14,10 @@ import {
 import { useNavigate } from "react-router-dom"; // ✅ add
 
 const stats = [
-  { title: "Total Queries", value: "12,430" },
-  { title: "Active Users", value: "2,145" },
-  { title: "AI Accuracy", value: "96%" },
+  { title: "Daily Questions this week", value: "96%" },
+  { title: "Orphan topics", value: "2,145" },
+  { title: "Out of scope", value: "12,430" },
+  { title: "No result found", value: "2,145" },
 ];
 
 type Page = "dashboard" | "profile";
