@@ -180,7 +180,7 @@ export default function ModelScreen() {
           {/* if add document lives on dashboard, navigate there */}
           <button onClick={() => navigate("/profile")}>Profile</button>
           <button onClick={() => navigate("/admins-list")}>Admin List</button>
-          <button>FAQ</button>
+          <button onClick={() => navigate("/faqs")}>FAQ</button>
         </nav>
       </aside>
 
@@ -369,7 +369,7 @@ export default function ModelScreen() {
                   </button>
                 </div>
 
-                <p className="hint" >
+                <p className="hint">
                   * Date Added and Last Edited are set automatically by the
                   system.
                 </p>

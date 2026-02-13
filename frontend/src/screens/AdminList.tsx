@@ -91,8 +91,7 @@ export default function AdminsList() {
           <button onClick={() => navigate("/profile")}>Profile</button>
 
           <button onClick={() => navigate("/models")}>Manage Models</button>
-
-          <button>FAQ</button>
+          <button onClick={() => navigate("/faqs")}>FAQ</button>
         </nav>
       </aside>
 
