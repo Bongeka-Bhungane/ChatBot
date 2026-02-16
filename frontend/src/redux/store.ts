@@ -3,6 +3,7 @@ import adminsReducer from "./adminSlice";
 import documentsReducer from "./documentSlice";
 import chatsReducer from "./chatSlice";
 import modelsReducer from "./modelSlice"; // ✅ add this
+import chatLogsSlice from "./chatlogsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     documents: documentsReducer,
     chats: chatsReducer,
     models: modelsReducer, // ✅ add this
+    chatLogs: chatLogsSlice,
   },
 });
 

@@ -7,7 +7,7 @@ import "./App.css";
 import Profile from "./screens/Profile";
 import AdminList from "./screens/AdminList";
 import ModelsScreen from "./screens/ModelsScreen";
-import FAQScreen from "./screens/FAQScreen";
+import ChatLogsScreen from "./screens/ChatLogsScreen";
 
 export default function App() {
   return (
@@ -31,7 +31,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/admins-list" element={<AdminList />} />
           <Route path="/models" element={<ModelsScreen />} />
-          <Route path="/faqs" element={<FAQScreen />} />
+          <Route path="/logs" element={<ChatLogsScreen />} />
           {/* dashboard route */}
           {/* other routes can go here */}
         </Routes>
