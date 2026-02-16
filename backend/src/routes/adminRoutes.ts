@@ -3,6 +3,7 @@ import {
   addAdmin,
   deleteAdmin,
   getAdminById,
+  getChatLogs,
   getAllAdmins,
   loginAdmin,
   updateAdmin,
@@ -11,6 +12,7 @@ import {
 const router = Router();
 
 router.get("/", getAllAdmins);
+router.get("/logs", getChatLogs);
 router.get("/:id", getAdminById);
 router.post("/register", addAdmin);
 router.post("/login", loginAdmin);
