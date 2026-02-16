@@ -8,6 +8,7 @@ import {
 } from "../Services/adminService";
 import { Admin } from "../types/admin";
 import { validateEmail } from "../utils/emailValidator";
+import { supabase } from "../lib/supabase";
 
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
@@ -81,5 +82,35 @@ export const deleteAdmin = async (req: Request, res: Response) => {
     res.json({ message: "Admin deleted successfully." });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete admin." });
+  }
+};
+
+// fetching all chat logs for searching and filtering
+
+export const getChatLogs = async (req: Request, res: Response) => {
+  try {
+    const { search, lang, type, framework, code, start, end } = req.query;
+
+    let query = supabase.from('chat_logs').select('*').order('createdAt', { ascending: false });
+
+    // Ensure we only add filters if the values actually exist
+    if (search && search !== '') query = query.ilike('question', `%${search}%`);
+    if (lang && lang !== '') query = query.eq('language_env', lang);
+    if (type && type !== '') query = query.eq('question_type', type);
+    if (framework && framework !== '') query = query.eq('framework', framework);
+    if (code && code !== '') query = query.eq('has_code', code === 'true');
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    // ALWAYS return an array, even if empty
+    res.json(data || []);
+  } catch (err: any) {
+    console.error("Server Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
