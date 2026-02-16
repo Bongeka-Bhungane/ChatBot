@@ -8,7 +8,7 @@ import {
   selectChatLogsError,
   type FetchChatLogsArgs,
   type ChatLog,
-} from "../redux/chatLogsSlice";
+} from "../../src/redux/chatLogsSlice";
 import {
   FiRefreshCw,
   FiSearch,

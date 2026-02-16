@@ -3,7 +3,7 @@ import adminsReducer from "./adminSlice";
 import documentsReducer from "./documentSlice";
 import chatsReducer from "./chatSlice";
 import modelsReducer from "./modelSlice"; // ✅ add this
-import chatLogsSlice from "./chatlogsSlice";
+import chatLogsSlice from "./chatLogsSlice";
 
 export const store = configureStore({
   reducer: {
