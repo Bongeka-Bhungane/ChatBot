@@ -2,28 +2,40 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "../dropdown.css";
 import { FaCheck } from "react-icons/fa";
-import { Models, type ChatModel, MODEL_META } from "../types/Chat";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../redux/store";
+import {
+  fetchModels,
+  selectModels,
+  selectModelsLoading,
+  type Model,
+} from "../redux/modelSlice";
 
 type ModelDropdownProps = {
-  model: ChatModel;
-  setModel: (model: ChatModel) => void;
-  onClose?: () => void; // optional close function
+  model: string | null; // selected model id
+  setModel: (modelId: string) => void;
+  onClose?: () => void;
 };
 
-export default function ModelDropdown({
-  model,
-  setModel,
-}: ModelDropdownProps) {
+export default function ModelDropdown({ model, setModel }: ModelDropdownProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const models = useSelector(selectModels) as Model[];
+  const loading = useSelector(selectModelsLoading);
+
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
-  const current = useMemo(() => MODEL_META[model], [model]);
+  useEffect(() => {
+    dispatch(fetchModels());
+  }, [dispatch]);
 
-  // Optional: mark which ones are "New" (edit as you like)
-  
+  const current = useMemo(() => {
+    return models.find((m) => m.id === model) || null;
+  }, [models, model]);
 
-  const handleSelect = (m: ChatModel) => {
-    setModel(m);
+  const handleSelect = (id?: string) => {
+    if (!id) return;
+    setModel(id);
     setOpen(false);
   };
 
@@ -57,7 +69,9 @@ export default function ModelDropdown({
         aria-expanded={open}
         title="Choose a model"
       >
-        <span className="model-dd-trigger-title">{current.label}</span>
+        <span className="model-dd-trigger-title">
+          {current ? current.name : "Select Model"}
+        </span>
 
         <span className={`model-dd-chevron ${open ? "open" : ""}`} aria-hidden>
           ▾
@@ -67,39 +81,57 @@ export default function ModelDropdown({
       {/* Popover */}
       {open && (
         <div className="model-dd-popover" role="menu">
-
           <div className="model-dd-list">
-            {Models.map((m) => {
-              const meta = MODEL_META[m];
-              const active = m === model;
+            {loading ? (
+              <button
+                type="button"
+                className="model-dd-item"
+                role="menuitem"
+                disabled
+              >
+                <div className="model-dd-item-left">
+                  <div className="model-dd-item-top">
+                    <span className="model-dd-item-name">Loading...</span>
+                  </div>
+                  <div className="model-dd-item-sub">Please wait</div>
+                </div>
+              </button>
+            ) : (
+              models.map((m) => {
+                const active = m.id === model;
 
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  className={`model-dd-item ${active ? "active" : ""}`}
-                  onClick={() => handleSelect(m)}
-                  role="menuitem"
-                >
-                  <div className="model-dd-item-left">
-                    <div className="model-dd-item-top">
-                      <span className="model-dd-item-name">{meta.label}</span>
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`model-dd-item ${active ? "active" : ""}`}
+                    onClick={() => handleSelect(m.id)}
+                    role="menuitem"
+                  >
+                    <div className="model-dd-item-left">
+                      <div className="model-dd-item-top">
+                        {/* ✅ ONLY name */}
+                        <span className="model-dd-item-name">{m.name}</span>
+                      </div>
 
-              
+                      {/* ✅ ONLY category */}
+                      <div className="model-dd-item-sub">{m.category}</div>
                     </div>
 
-                    <div className="model-dd-item-sub">{meta.description}</div>
-                  </div>
-
-                  {active && <span className="model-dd-check">
-                    <FaCheck size={16} aria-label="Selected" title="Selected" />
-                    </span>}
-                </button>
-              );
-            })}
+                    {active && (
+                      <span className="model-dd-check">
+                        <FaCheck
+                          size={16}
+                          aria-label="Selected"
+                          title="Selected"
+                        />
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
-
-          
         </div>
       )}
     </div>
