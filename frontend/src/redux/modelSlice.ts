@@ -7,18 +7,13 @@ import {
 import type { RootState } from "./store";
 import axios from "axios";
 
-/** ✅ Backend base URL */
+
 const BASE_URL = "https://chatbot-w3ue.onrender.com";
 
-/**
- * IMPORTANT:
- * This assumes your Express app mounts the router like:
- *   app.use("/models", modelRoutes)
- * If you mounted it differently, change API_PATH below.
- */
+
 const API_PATH = "/models";
 
-/** ✅ DB Model shape (adjust if your Supabase columns differ) */
+
 export type ModelCategory =
   | "Policy & Compliance"
   | "Technical  & Logic"
@@ -27,7 +22,8 @@ export type ModelCategory =
 export interface Model {
   id?: string;
   apiKey: string;
-  modelName: string;
+  name: string;
+  fullName: string;
   systemPrompt: string;
   category: ModelCategory;
   createdAt?: string; 
@@ -49,9 +45,9 @@ async function apiRequest<T>(
     ...options,
   });
 
-  // Try parse JSON, even on errors
+  
   const text = await res.text();
-  const data = text ? (JSON.parse(text) as any) : null;
+  const data = text ? (JSON.parse(text) as string) : null;
 
   if (!res.ok) {
     const errMsg =
@@ -114,18 +110,6 @@ export const updateModel = createAsyncThunk<
   Model,
   { id: string; changes: Partial<Model> }
 >("models/update", async ({ id, changes }) => {
-  /**
-   * Your controller/service supports updateModelDB(id,...),
-   * BUT your modelRoutes currently do NOT expose PUT/PATCH.
-   *
-   * ✅ Add this in modelRoutes:
-   *   router.put("/:id", updateModel);
-   *   router.patch("/:id", updateModel);
-   *   router.delete("/:id", deleteModel);
-   *
-   * If you add PUT, keep method "PUT" below.
-   * If you add PATCH, you can use "PATCH".
-   */
   return apiRequest<Model>(`/${id}`, {
     method: "PUT",
     body: JSON.stringify(changes),
@@ -139,7 +123,6 @@ export const deleteModel = createAsyncThunk<Model, string>(
   },
 );
 
-/** Optional: "eye icon" hide/unhide (requires isHidden column + update route) */
 export const toggleModelHidden = createAsyncThunk<
   Model,
   { id: string; isHidden: boolean }

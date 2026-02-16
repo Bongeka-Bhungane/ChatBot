@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSettings, FiSend } from "react-icons/fi";
 import ModelDropdown from "../components/ModelDropdown";
@@ -9,11 +9,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../redux/store";
 import { sendChat } from "../redux/chatSlice";
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import { selectModels, type Model } from "../redux/modelSlice";
 
 type Message = {
   sender: "user" | "bot";
   text: string;
-  duration?: string; // Optional field to display response time for bot messages
+  duration?: string;
 };
 
 export default function ChatScreen() {
@@ -21,11 +22,28 @@ export default function ChatScreen() {
     { sender: "bot", text: "Hello  How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
-  const [model, setModel] = useState<ChatModel>("stepfun");
+
+  // ✅ dropdown uses modelId now
+  const models = useSelector(selectModels) as Model[];
+  const [modelId, setModelId] = useState<string | null>(null);
+
+  // ✅ derive ChatModel from selected model in store
+  const selectedModel = useMemo(() => {
+    if (!modelId) return null;
+    return models.find((m) => m.id === modelId) || null;
+  }, [models, modelId]);
+
+  // fallback modelType if nothing selected yet
+  const modelType: ChatModel = useMemo(() => {
+    // IMPORTANT: your backend model "name" should match ChatModel values (e.g. "stepfun")
+    return (selectedModel?.name as ChatModel) ?? "stepfun";
+  }, [selectedModel]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const { currentChat, chats } = useSelector((state: RootState) => state.chats); // Placeholder for future chat-related state
-  const dispatch = useDispatch<AppDispatch>(); // Placeholder for future dispatching of chat actions
+
+  const { currentChat, chats } = useSelector((state: RootState) => state.chats);
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,30 +52,28 @@ export default function ChatScreen() {
         const botMsg: Message = {
           sender: "bot",
           text: currentChat.answer,
-          duration: currentChat.duration, // Display response time if available
+          duration: currentChat.duration,
         };
         return [...prev, botMsg];
       }
       return prev;
     });
     setIsThinking(false);
-  }, [currentChat, chats]); // Placeholder for future side effects related to chat state changes
+  }, [currentChat, chats]);
 
   const handleSend = () => {
     if (!input.trim() || isThinking) return;
 
     const payload: Chat = {
       query: input.trim(),
-      modelType: model,
+      modelType: modelType, // ✅ now correct type
     };
 
     setMessages((prev) => [...prev, { sender: "user", text: input.trim() }]);
     setInput("");
     setIsThinking(true);
-    // call thunk to send chat to backend
     dispatch(sendChat(payload));
-  }; //  ChatGPT-style "first open" empty state:
-  // show centered greeting ONLY when there are no user messages yet
+  };
 
   const isEmptyState = messages.every((m) => m.sender !== "user");
 
@@ -70,14 +86,13 @@ export default function ChatScreen() {
       )}
 
       <div className={`chat-popup ${isOpen ? "open" : ""}`}>
-        {/* HEADER */}
-
         <div className="chat-header">
           <div className="chat-header-left">
             <span className="model">Choose a model</span>
 
             <div className="model-btn">
-              <ModelDropdown model={model} setModel={setModel} />
+              {/* ✅ dropdown now controls modelId */}
+              <ModelDropdown model={modelId} setModel={setModelId} />
             </div>
           </div>
 
@@ -95,7 +110,6 @@ export default function ChatScreen() {
             </button>
           </div>
         </div>
-        {/* BODY */}
 
         <div className="chat-screen">
           <div className="chat-body">
@@ -114,9 +128,9 @@ export default function ChatScreen() {
                         source={ms.text}
                         style={{
                           background: "transparent",
-                          color: "inherit", 
-                          padding: 0, 
-                          fontSize: "14px", 
+                          color: "inherit",
+                          padding: 0,
+                          fontSize: "14px",
                         }}
                       />
                     </div>
@@ -132,7 +146,6 @@ export default function ChatScreen() {
                 {isThinking && (
                   <div className="chat-bubble bot thinking">
                     <img src={chatIcon} alt="AI" width={18} />
-
                     <span>
                       Thinking
                       <span className="dots"></span>
@@ -142,7 +155,6 @@ export default function ChatScreen() {
               </>
             )}
           </div>
-          {/* INPUT (Gemini-style pill) */}
 
           <div className="chat-footer">
             <div className={`chat-input-pill ${isThinking ? "disabled" : ""}`}>
@@ -155,10 +167,6 @@ export default function ChatScreen() {
                 disabled={isThinking}
               />
               <div className="pill-right">
-                {/* Model Dropdown */}
-
-                {/* Send icon */}
-
                 <button
                   className="send-icon-btn"
                   onClick={handleSend}
