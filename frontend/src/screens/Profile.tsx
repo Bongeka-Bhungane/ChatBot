@@ -61,7 +61,10 @@ export default function Profile() {
     <div className="profile-container">
       <div className="profile-card">
         {/* BACK BUTTON */}
-        <button className="close" onClick={() => window.location.href = "/dashboard"}>
+        <button
+          className="close"
+          onClick={() => (window.location.href = "/dashboard")}
+        >
           <X size={20} />
         </button>
 
@@ -78,11 +81,11 @@ export default function Profile() {
         </div>
 
         <div className="profile-actions">
-          <button className="submit-btn" onClick={() => setShowModal(true)}>
+          <button className="cancel-btn" onClick={() => setShowModal(true)}>
             Edit Profile
           </button>
           <button
-            className="logout-btn"
+            className="cancel-btn"
             onClick={() => {
               localStorage.removeItem("admin");
               window.location.href = "/";
@@ -127,7 +130,7 @@ export default function Profile() {
               />
 
               <div className="modal-actions">
-                <button type="submit" className="submit-btn">
+                <button type="submit" className="cancel-btn">
                   Save
                 </button>
 

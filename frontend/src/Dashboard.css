@@ -266,17 +266,17 @@
 
 .cancel-btn {
   margin-top: 1rem;
-  background: #94C73D;
+  background:#0f3b48;
   border: none;
   padding: 0.8rem;
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
-  color: #0f3b48;
+  color: white;
   font-size: 1rem;
 }
 .cancel-btn:hover {
-  background: #17cc00;
+  background:#94C73D;
 }
 
 .modal-actions {
