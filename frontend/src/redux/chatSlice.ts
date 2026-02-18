@@ -16,8 +16,8 @@ const initialState: ChatState = {
   error: null,
 };
 
-const BASE_URL = "https://chatbot-w3ue.onrender.com/api/chat"; // update if deployed
-
+// Use localhost for your local testing environment
+const BASE_URL = "http://localhost:5000/api/chat"; 
 
 export const sendChat = createAsyncThunk(
   "chat/send",
@@ -27,17 +27,25 @@ export const sendChat = createAsyncThunk(
       const response = await axios.post(BASE_URL, chat);
       console.log("Received response from backend:", response.data);
       return response.data;
-    } catch (error) {
-      return rejectWithValue(error);
-      console.error("Error sending chat:", error);
+    } catch (error: any) {
+      // Logic Fix: Extract the error message before returning
+      const errorMessage = error.response?.data?.error || error.message || "Something went wrong";
+      console.error("Error sending chat:", errorMessage);
+      return rejectWithValue(errorMessage);
     }
-  },
+  }
 );
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
-  reducers: {},
+  reducers: {
+    // Optional: Add a reducer to clear chat history if needed
+    clearChat: (state) => {
+      state.chats = [];
+      state.currentChat = null;
+    }
+  },
   extraReducers: (builder) => {
     builder.addCase(sendChat.pending, (state) => {
       state.loading = true;
@@ -51,10 +59,11 @@ const chatSlice = createSlice({
     });
     builder.addCase(sendChat.rejected, (state, action) => {
       state.loading = false;
+      // action.payload now contains the string message from rejectWithValue
       state.error = action.payload as string;
-      console.log(404, "Chat send failed:", state.error);
     });
   },
 });
 
+export const { clearChat } = chatSlice.actions;
 export default chatSlice.reducer;
