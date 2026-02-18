@@ -16,6 +16,7 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import "../css/chatLogs.css";
 
 /* ================= Helpers ================= */
@@ -301,6 +302,8 @@ function dayName(d: number) {
 type TimeWindow = "" | "24h" | "7d" | "mon";
 
 export default function ChatLogsScreen() {
+  const navigate = useNavigate();
+
   const dispatch = useDispatch<AppDispatch>();
   const logs = useSelector((s: RootState) => selectChatLogs(s));
   const loading = useSelector((s: RootState) => selectChatLogsLoading(s));
@@ -314,7 +317,7 @@ export default function ChatLogsScreen() {
   const [code, setCode] = useState<"" | "true" | "false">("");
 
   // Insight filters (client-side)
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>(""); // last 24h / this week / monday
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>("");
   const [stackArea, setStackArea] = useState<
     "" | "frontend" | "backend" | "database" | "other"
   >("");
@@ -392,31 +395,26 @@ export default function ChatLogsScreen() {
   // Apply insight filters client-side
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
-      // time window
       if (timeWindow === "24h" && !inLastHours(log.createdAt, 24)) return false;
       if (timeWindow === "7d" && !inThisWeek(log.createdAt)) return false;
       if (timeWindow === "mon" && !isMonday(log.createdAt)) return false;
 
-      // day of week
       if (dayOfWeek) {
         const d = log.createdAt ? new Date(log.createdAt) : null;
         if (!d || Number.isNaN(d.getTime())) return false;
         if (dayName(d.getDay()) !== dayOfWeek) return false;
       }
 
-      // stack area
       if (stackArea) {
         const area = classifyStackArea(log);
         if (area !== stackArea) return false;
       }
 
-      // intent
       if (intent) {
         const i = classifyIntent(log);
         if (i !== intent) return false;
       }
 
-      // stuck stage
       if (stuckStage) {
         const s = classifyStuckStage(log);
         if (s !== stuckStage) return false;
@@ -426,7 +424,6 @@ export default function ChatLogsScreen() {
     });
   }, [logs, timeWindow, stackArea, intent, stuckStage, dayOfWeek]);
 
-  /* ================= Quick Insight Stats (top of screen) ================= */
   const insightStats = useMemo(() => {
     const total = filteredLogs.length;
 
@@ -462,9 +459,10 @@ export default function ChatLogsScreen() {
       if (l.createdAt) {
         const d = new Date(l.createdAt);
         if (!Number.isNaN(d.getTime())) {
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-            d.getDate(),
-          ).padStart(2, "0")}`;
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+            2,
+            "0",
+          )}-${String(d.getDate()).padStart(2, "0")}`;
           dayCount.set(key, (dayCount.get(key) || 0) + 1);
         }
       }
@@ -481,12 +479,10 @@ export default function ChatLogsScreen() {
     const topLang = topOf(langCount);
     const topFw = topOf(fwCount);
 
-    // “this week per day” helper: just sort keys
     const perDay = Array.from(dayCount.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .slice(-7); // show last 7 keys we have
+      .slice(-7);
 
-    // top stuck stage
     const topStage = topOf(stageCount);
 
     return {
@@ -505,416 +501,434 @@ export default function ChatLogsScreen() {
   }, [filteredLogs]);
 
   return (
-    <div className="chatlogs-page">
-      <div className="chatlogs-header">
-        <div>
-          <h2>Chat Logs</h2>
-          <p>
-            Filters tuned for insights: stuck points, languages, frameworks,
-            code usage, and trends.
-          </p>
-        </div>
+    <div className="admin-layout">
+      <aside className="sidebar">
+        <nav>
+          <div className="sidebar__title">Admin Dashboard</div>
+          <button onClick={() => navigate("/dashboard")}>Dashboard</button>
+          <button onClick={() => navigate("/profile")}>Profile</button>
+          <button onClick={() => navigate("/admins-list")}>Admin List</button>
+          <button onClick={() => navigate("/models")}>Manage Models</button>
+        </nav>
+      </aside>
 
-        <div className="chatlogs-header-actions">
-          <button
-            className="btn btn-ghost"
-            onClick={onClear}
-            disabled={loading}
-          >
-            <FiX /> Clear
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={onRefresh}
-            disabled={loading}
-          >
-            <FiRefreshCw /> Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Insight summary (answers the questions quickly) */}
-      <div className="insight-bar">
-        <div className="insight-card">
-          <div className="insight-k">Total (filtered)</div>
-          <div className="insight-v">{insightStats.total}</div>
-        </div>
-        <div className="insight-card">
-          <div className="insight-k">Top language</div>
-          <div className="insight-v">{insightStats.topLang}</div>
-        </div>
-        <div className="insight-card">
-          <div className="insight-k">Hardest framework</div>
-          <div className="insight-v">{insightStats.topFw}</div>
-        </div>
-        <div className="insight-card">
-          <div className="insight-k">Backend code included</div>
-          <div className="insight-v">{insightStats.backendCodeRate}</div>
-        </div>
-        <div className="insight-card">
-          <div className="insight-k">How vs broken</div>
-          <div className="insight-v">{insightStats.howVsBroken}</div>
-        </div>
-        <div className="insight-card">
-          <div className="insight-k">Where stuck most</div>
-          <div className="insight-v">{insightStats.topStage}</div>
-        </div>
-      </div>
-
-      {/* Filters: API filters + insight filters */}
-      <div className="chatlogs-filters insight-filters">
-        {/* Search */}
-        <div className="filter search">
-          <FiSearch className="search-icon" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search question / answer / model / source / keywords (e.g. 'database', 'CORS', 'ts(2322)')"
-          />
-          {search ? (
-            <button
-              className="clear-x"
-              onClick={() => setSearch("")}
-              aria-label="Clear search"
-            >
-              <FiX />
-            </button>
-          ) : null}
-        </div>
-
-        {/* API filters */}
-        <div className="filter">
-          <label>Language</label>
-          <select value={lang} onChange={(e) => setLang(e.target.value)}>
-            <option value="">All</option>
-            {uniqueLangs.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Framework</label>
-          <select
-            value={framework}
-            onChange={(e) => setFramework(e.target.value)}
-          >
-            <option value="">All</option>
-            {uniqueFrameworks.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Question type (from DB)</label>
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="">All</option>
-            {uniqueTypes.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Has code (from DB)</label>
-          <select value={code} onChange={(e) => setCode(e.target.value as any)}>
-            <option value="">All</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </div>
-
-        {/* Insight-only filters */}
-        <div className="filter">
-          <label>Time window</label>
-          <select
-            value={timeWindow}
-            onChange={(e) => setTimeWindow(e.target.value as TimeWindow)}
-          >
-            <option value="">All time (loaded)</option>
-            <option value="24h">Last 24 hours</option>
-            <option value="7d">This week (Mon→today)</option>
-            <option value="mon">Mondays only</option>
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Day of week</label>
-          <select
-            value={dayOfWeek}
-            onChange={(e) => setDayOfWeek(e.target.value as any)}
-          >
-            <option value="">Any</option>
-            <option value="Mon">Mon</option>
-            <option value="Tue">Tue</option>
-            <option value="Wed">Wed</option>
-            <option value="Thu">Thu</option>
-            <option value="Fri">Fri</option>
-            <option value="Sat">Sat</option>
-            <option value="Sun">Sun</option>
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Stack area</label>
-          <select
-            value={stackArea}
-            onChange={(e) => setStackArea(e.target.value as any)}
-          >
-            <option value="">All</option>
-            <option value="frontend">Frontend</option>
-            <option value="backend">Backend</option>
-            <option value="database">Database</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Intent</label>
-          <select
-            value={intent}
-            onChange={(e) => setIntent(e.target.value as any)}
-          >
-            <option value="">All</option>
-            <option value="how">How it works</option>
-            <option value="broken">Code broken</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        </div>
-
-        <div className="filter">
-          <label>Where stuck</label>
-          <select
-            value={stuckStage}
-            onChange={(e) => setStuckStage(e.target.value as any)}
-          >
-            <option value="">All</option>
-            <option value="setup">Setup / install</option>
-            <option value="build">Build / compile</option>
-            <option value="types">Types / TS</option>
-            <option value="runtime">Runtime crash</option>
-            <option value="api">API / auth / server</option>
-            <option value="db">Database</option>
-            <option value="ui">UI / layout</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Optional: simple “daily count” preview (this week) */}
-      {insightStats.perDay.length ? (
-        <div className="daily-strip">
-          <div className="daily-title">
-            Daily questions (latest 7 days we have loaded)
-          </div>
-          <div className="daily-items">
-            {insightStats.perDay.map(([k, v]) => (
-              <div key={k} className="daily-pill">
-                <span className="d">{k}</span>
-                <span className="n">{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="chatlogs-body">
-        {loading ? (
-          <div className="state-box">
-            <div className="spinner" />
+      <main className="admin-content">
+        <div className="chatlogs-page">
+          <div className="chatlogs-header">
             <div>
-              <div className="state-title">Loading logs…</div>
-              <div className="state-sub">Fetching from the server.</div>
+              <h2>Chat Logs</h2>
+              <p>
+                Filters tuned for insights: stuck points, languages, frameworks,
+                code usage, and trends.
+              </p>
             </div>
-          </div>
-        ) : error ? (
-          <div className="state-box error">
-            <div>
-              <div className="state-title">Couldn’t load logs</div>
-              <div className="state-sub">{error}</div>
-              <button className="btn btn-primary mt" onClick={onRefresh}>
-                <FiRefreshCw /> Try again
+
+            <div className="chatlogs-header-actions">
+              <button
+                className="btn btn-ghost"
+                onClick={onClear}
+                disabled={loading}
+              >
+                <FiX /> Clear
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={onRefresh}
+                disabled={loading}
+              >
+                <FiRefreshCw /> Refresh
               </button>
             </div>
           </div>
-        ) : !filteredLogs.length ? (
-          <div className="state-box">
-            <div>
-              <div className="state-title">No logs match these filters</div>
-              <div className="state-sub">
-                Try clearing the insight filters or widening the time window.
-              </div>
+
+          <div className="insight-bar">
+            <div className="insight-card">
+              <div className="insight-k">Total (filtered)</div>
+              <div className="insight-v">{insightStats.total}</div>
+            </div>
+            <div className="insight-card">
+              <div className="insight-k">Top language</div>
+              <div className="insight-v">{insightStats.topLang}</div>
+            </div>
+            <div className="insight-card">
+              <div className="insight-k">Hardest framework</div>
+              <div className="insight-v">{insightStats.topFw}</div>
+            </div>
+            <div className="insight-card">
+              <div className="insight-k">Backend code included</div>
+              <div className="insight-v">{insightStats.backendCodeRate}</div>
+            </div>
+            <div className="insight-card">
+              <div className="insight-k">How vs broken</div>
+              <div className="insight-v">{insightStats.howVsBroken}</div>
+            </div>
+            <div className="insight-card">
+              <div className="insight-k">Where stuck most</div>
+              <div className="insight-v">{insightStats.topStage}</div>
             </div>
           </div>
-        ) : (
-          <div className="table-wrap">
-            <table className="chatlogs-table">
-              <thead>
-                <tr>
-                  <th style={{ width: 90 }}>Date</th>
-                  <th>Question</th>
-                  <th style={{ width: 120 }}>Model</th>
-                  <th style={{ width: 140 }}>Source</th>
-                  <th style={{ width: 120 }}>Framework</th>
-                  <th style={{ width: 110 }}>In-scope</th>
-                  <th style={{ width: 120 }}>In-context</th>
-                  <th style={{ width: 130 }}>Appropriate</th>
-                  <th style={{ width: 90 }}>Code</th>
-                  <th style={{ width: 80 }}></th>
-                </tr>
-              </thead>
 
-              <tbody>
-                {filteredLogs.map((log) => {
-                  const isOpen = openId === log.id;
-                  return (
-                    <>
-                      <tr key={log.id} className={isOpen ? "row-open" : ""}>
-                        <td className="mono small">
-                          {formatDate(log.createdAt)}
-                        </td>
+          <div className="chatlogs-filters insight-filters">
+            <div className="filter search">
+              <FiSearch className="search-icon" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search question / answer / model / source / keywords (e.g. 'database', 'CORS', 'ts(2322)')"
+              />
+              {search ? (
+                <button
+                  className="clear-x"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear search"
+                >
+                  <FiX />
+                </button>
+              ) : null}
+            </div>
 
-                        <td>
-                          <div className="cell-title">
-                            {log.question?.trim() ? (
-                              log.question
-                            ) : (
-                              <span className="muted">No question</span>
-                            )}
-                          </div>
-                          <div className="cell-meta">
-                            <span className="chip">
-                              {log.language_env || "—"}
-                            </span>
-                            <span className="chip">
-                              {log.question_type || "—"}
-                            </span>
-                            <span className="chip">{log.framework || "—"}</span>
-                            <span className="chip">
-                              {classifyStackArea(log)}
-                            </span>
-                            <span className="chip">{classifyIntent(log)}</span>
-                            <span className="chip">
-                              {classifyStuckStage(log)}
-                            </span>
-                          </div>
-                        </td>
+            <div className="filter">
+              <label>Language</label>
+              <select value={lang} onChange={(e) => setLang(e.target.value)}>
+                <option value="">All</option>
+                {uniqueLangs.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                        <td className="mono">{log.modelused || "—"}</td>
-                        <td className="truncate">{log.source || "—"}</td>
-                        <td className="truncate">{log.framework || "—"}</td>
+            <div className="filter">
+              <label>Framework</label>
+              <select
+                value={framework}
+                onChange={(e) => setFramework(e.target.value)}
+              >
+                <option value="">All</option>
+                {uniqueFrameworks.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                        <td>
-                          <span className={pillClass(log.inscope)}>
-                            {boolLabel(log.inscope)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={pillClass(log.incontext)}>
-                            {boolLabel(log.incontext)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={pillClass(log.appropriate)}>
-                            {boolLabel(log.appropriate)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={pillClass(log.has_code)}>
-                            {boolLabel(log.has_code)}
-                          </span>
-                        </td>
+            <div className="filter">
+              <label>Question type (from DB)</label>
+              <select value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="">All</option>
+                {uniqueTypes.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                        <td className="actions">
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() =>
-                              setOpenId((prev) =>
-                                prev === log.id ? null : log.id,
-                              )
-                            }
-                            aria-label={isOpen ? "Collapse" : "Expand"}
-                          >
-                            {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-                          </button>
-                        </td>
-                      </tr>
+            <div className="filter">
+              <label>Has code (from DB)</label>
+              <select
+                value={code}
+                onChange={(e) => setCode(e.target.value as any)}
+              >
+                <option value="">All</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
 
-                      {isOpen ? (
-                        <tr key={`${log.id}-detail`} className="detail-row">
-                          <td colSpan={9}>
-                            <div className="detail-grid">
-                              <div className="detail-block">
-                                <div className="detail-label">
-                                  Full question
-                                </div>
-                                <div className="detail-text">
-                                  {log.question || "—"}
-                                </div>
-                              </div>
+            <div className="filter">
+              <label>Time window</label>
+              <select
+                value={timeWindow}
+                onChange={(e) => setTimeWindow(e.target.value as TimeWindow)}
+              >
+                <option value="">All time (loaded)</option>
+                <option value="24h">Last 24 hours</option>
+                <option value="7d">This week (Mon→today)</option>
+                <option value="mon">Mondays only</option>
+              </select>
+            </div>
 
-                              <div className="detail-block">
-                                <div className="detail-label">Answer</div>
-                                <div className="detail-text prewrap">
-                                  {log.answer || "—"}
-                                </div>
-                              </div>
+            <div className="filter">
+              <label>Day of week</label>
+              <select
+                value={dayOfWeek}
+                onChange={(e) => setDayOfWeek(e.target.value as any)}
+              >
+                <option value="">Any</option>
+                <option value="Mon">Mon</option>
+                <option value="Tue">Tue</option>
+                <option value="Wed">Wed</option>
+                <option value="Thu">Thu</option>
+                <option value="Fri">Fri</option>
+                <option value="Sat">Sat</option>
+                <option value="Sun">Sun</option>
+              </select>
+            </div>
 
-                              <div className="detail-kv">
-                                <div className="kv">
-                                  <span className="k">Stack area</span>
-                                  <span className="v">
-                                    {classifyStackArea(log)}
-                                  </span>
-                                </div>
-                                <div className="kv">
-                                  <span className="k">Intent</span>
-                                  <span className="v">
-                                    {classifyIntent(log)}
-                                  </span>
-                                </div>
-                                <div className="kv">
-                                  <span className="k">Where stuck</span>
-                                  <span className="v">
-                                    {classifyStuckStage(log)}
-                                  </span>
-                                </div>
-                                <div className="kv">
-                                  <span className="k">Model</span>
-                                  <span className="v mono">
-                                    {log.modelused || "—"}
-                                  </span>
-                                </div>
-                                <div className="kv">
-                                  <span className="k">Source</span>
-                                  <span className="v">{log.source || "—"}</span>
-                                </div>
-                                <div className="kv">
-                                  <span className="k">Created</span>
-                                  <span className="v mono">
-                                    {formatDate(log.createdAt)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : null}
-                    </>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="filter">
+              <label>Stack area</label>
+              <select
+                value={stackArea}
+                onChange={(e) => setStackArea(e.target.value as any)}
+              >
+                <option value="">All</option>
+                <option value="frontend">Frontend</option>
+                <option value="backend">Backend</option>
+                <option value="database">Database</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div className="filter">
+              <label>Intent</label>
+              <select
+                value={intent}
+                onChange={(e) => setIntent(e.target.value as any)}
+              >
+                <option value="">All</option>
+                <option value="how">How it works</option>
+                <option value="broken">Code broken</option>
+                <option value="unknown">Unknown</option>
+              </select>
+            </div>
+
+            <div className="filter">
+              <label>Where stuck</label>
+              <select
+                value={stuckStage}
+                onChange={(e) => setStuckStage(e.target.value as any)}
+              >
+                <option value="">All</option>
+                <option value="setup">Setup / install</option>
+                <option value="build">Build / compile</option>
+                <option value="types">Types / TS</option>
+                <option value="runtime">Runtime crash</option>
+                <option value="api">API / auth / server</option>
+                <option value="db">Database</option>
+                <option value="ui">UI / layout</option>
+                <option value="unknown">Unknown</option>
+              </select>
+            </div>
           </div>
-        )}
-      </div>
+
+          {insightStats.perDay.length ? (
+            <div className="daily-strip">
+              <div className="daily-title">
+                Daily questions (latest 7 days we have loaded)
+              </div>
+              <div className="daily-items">
+                {insightStats.perDay.map(([k, v]) => (
+                  <div key={k} className="daily-pill">
+                    <span className="d">{k}</span>
+                    <span className="n">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="chatlogs-body">
+            {loading ? (
+              <div className="state-box">
+                <div className="spinner" />
+                <div>
+                  <div className="state-title">Loading logs…</div>
+                  <div className="state-sub">Fetching from the server.</div>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="state-box error">
+                <div>
+                  <div className="state-title">Couldn’t load logs</div>
+                  <div className="state-sub">{error}</div>
+                  <button className="btn btn-primary mt" onClick={onRefresh}>
+                    <FiRefreshCw /> Try again
+                  </button>
+                </div>
+              </div>
+            ) : !filteredLogs.length ? (
+              <div className="state-box">
+                <div>
+                  <div className="state-title">No logs match these filters</div>
+                  <div className="state-sub">
+                    Try clearing the insight filters or widening the time
+                    window.
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="table-wrap">
+                <table className="chatlogs-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 90 }}>Date</th>
+                      <th>Question</th>
+                      <th style={{ width: 120 }}>Model</th>
+                      <th style={{ width: 140 }}>Source</th>
+                      <th style={{ width: 120 }}>Framework</th>
+                      <th style={{ width: 110 }}>In-scope</th>
+                      <th style={{ width: 120 }}>In-context</th>
+                      <th style={{ width: 130 }}>Appropriate</th>
+                      <th style={{ width: 90 }}>Code</th>
+                      <th style={{ width: 80 }}></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredLogs.map((log) => {
+                      const isOpen = openId === log.id;
+                      return (
+                        <>
+                          <tr key={log.id} className={isOpen ? "row-open" : ""}>
+                            <td className="mono small">
+                              {formatDate(log.createdAt)}
+                            </td>
+
+                            <td>
+                              <div className="cell-title">
+                                {log.question?.trim() ? (
+                                  log.question
+                                ) : (
+                                  <span className="muted">No question</span>
+                                )}
+                              </div>
+                              <div className="cell-meta">
+                                <span className="chip">
+                                  {log.language_env || "—"}
+                                </span>
+                                <span className="chip">
+                                  {log.question_type || "—"}
+                                </span>
+                                <span className="chip">
+                                  {log.framework || "—"}
+                                </span>
+                                <span className="chip">
+                                  {classifyStackArea(log)}
+                                </span>
+                                <span className="chip">
+                                  {classifyIntent(log)}
+                                </span>
+                                <span className="chip">
+                                  {classifyStuckStage(log)}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="mono">{log.modelused || "—"}</td>
+                            <td className="truncate">{log.source || "—"}</td>
+                            <td className="truncate">{log.framework || "—"}</td>
+
+                            <td>
+                              <span className={pillClass(log.inscope)}>
+                                {boolLabel(log.inscope)}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={pillClass(log.incontext)}>
+                                {boolLabel(log.incontext)}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={pillClass(log.appropriate)}>
+                                {boolLabel(log.appropriate)}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={pillClass(log.has_code)}>
+                                {boolLabel(log.has_code)}
+                              </span>
+                            </td>
+
+                            <td className="actions">
+                              <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() =>
+                                  setOpenId((prev) =>
+                                    prev === log.id ? null : log.id,
+                                  )
+                                }
+                                aria-label={isOpen ? "Collapse" : "Expand"}
+                              >
+                                {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+                              </button>
+                            </td>
+                          </tr>
+
+                          {isOpen ? (
+                            <tr key={`${log.id}-detail`} className="detail-row">
+                              <td colSpan={9}>
+                                <div className="detail-grid">
+                                  <div className="detail-block">
+                                    <div className="detail-label">
+                                      Full question
+                                    </div>
+                                    <div className="detail-text">
+                                      {log.question || "—"}
+                                    </div>
+                                  </div>
+
+                                  <div className="detail-block">
+                                    <div className="detail-label">Answer</div>
+                                    <div className="detail-text prewrap">
+                                      {log.answer || "—"}
+                                    </div>
+                                  </div>
+
+                                  <div className="detail-kv">
+                                    <div className="kv">
+                                      <span className="k">Stack area</span>
+                                      <span className="v">
+                                        {classifyStackArea(log)}
+                                      </span>
+                                    </div>
+                                    <div className="kv">
+                                      <span className="k">Intent</span>
+                                      <span className="v">
+                                        {classifyIntent(log)}
+                                      </span>
+                                    </div>
+                                    <div className="kv">
+                                      <span className="k">Where stuck</span>
+                                      <span className="v">
+                                        {classifyStuckStage(log)}
+                                      </span>
+                                    </div>
+                                    <div className="kv">
+                                      <span className="k">Model</span>
+                                      <span className="v mono">
+                                        {log.modelused || "—"}
+                                      </span>
+                                    </div>
+                                    <div className="kv">
+                                      <span className="k">Source</span>
+                                      <span className="v">
+                                        {log.source || "—"}
+                                      </span>
+                                    </div>
+                                    <div className="kv">
+                                      <span className="k">Created</span>
+                                      <span className="v mono">
+                                        {formatDate(log.createdAt)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : null}
+                        </>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

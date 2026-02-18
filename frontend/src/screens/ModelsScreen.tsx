@@ -220,7 +220,7 @@ export default function ModelScreen() {
           <button onClick={() => navigate("/dashboard")}>Dashboard</button>
           <button onClick={() => navigate("/profile")}>Profile</button>
           <button onClick={() => navigate("/admins-list")}>Admin List</button>
-          <button onClick={() => navigate("/faqs")}>FAQ</button>
+          <button onClick={() => navigate("/logs")}>Chat Logs</button>
         </nav>
       </aside>
 
