@@ -17,7 +17,7 @@ const initialState: ChatState = {
 };
 
 // Use localhost for your local testing environment
-const BASE_URL = "http://localhost:5000/api/chat"; 
+const BASE_URL = "https://chatbot-w3ue.onrender.com/api/chat"; 
 
 export const sendChat = createAsyncThunk(
   "chat/send",
