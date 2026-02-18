@@ -615,7 +615,7 @@ export default function ChatLogsScreen() {
             </div>
 
             <div className="filter">
-              <label>Question type (from DB)</label>
+              <label>Question type</label>
               <select value={type} onChange={(e) => setType(e.target.value)}>
                 <option value="">All</option>
                 {uniqueTypes.map((v) => (
@@ -626,8 +626,8 @@ export default function ChatLogsScreen() {
               </select>
             </div>
 
-            <div className="filter">
-              <label>Has code (from DB)</label>
+            {/* <div className="filter">
+              <label>Has code</label>
               <select
                 value={code}
                 onChange={(e) => setCode(e.target.value as any)}
@@ -636,9 +636,9 @@ export default function ChatLogsScreen() {
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>
-            </div>
+            </div> */}
 
-            <div className="filter">
+            {/* <div className="filter">
               <label>Time window</label>
               <select
                 value={timeWindow}
@@ -711,7 +711,7 @@ export default function ChatLogsScreen() {
                 <option value="ui">UI / layout</option>
                 <option value="unknown">Unknown</option>
               </select>
-            </div>
+            </div> */}
           </div>
 
           {insightStats.perDay.length ? (

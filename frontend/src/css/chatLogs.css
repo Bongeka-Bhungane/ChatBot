@@ -65,6 +65,8 @@
 
 .filter.search {
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .search-icon {
