@@ -216,8 +216,14 @@
 }
 
 .chat-header-right {
-  display: flex;
+  display: flex;;
   gap: 12px;
+}
+
+.chat-header-left{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .nav-btn {
