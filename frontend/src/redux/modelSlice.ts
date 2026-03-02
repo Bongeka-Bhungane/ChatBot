@@ -116,11 +116,18 @@ export const updateModel = createAsyncThunk<
   });
 });
 
-export const deleteModel = createAsyncThunk<Model, string>(
+export const deleteModel = createAsyncThunk<string, string>(
   "models/delete",
-  async (id) => {
-    return apiRequest<Model>(`/${id}`, { method: "DELETE" });
-  },
+  async (id, { rejectWithValue }) => {
+    try {
+      // Use the same pattern as fetchModels
+      await axios.delete(`${BASE_URL}/api/models/${id}`);
+      return id; // Return the ID so the reducer knows which one to remove
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to delete model";
+      return rejectWithValue(message);
+    }
+  }
 );
 
 export const toggleModelHidden = createAsyncThunk<
@@ -241,11 +248,12 @@ const modelsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+
       .addCase(deleteModel.fulfilled, (state, action) => {
         state.loading = false;
-        const deleted = action.payload;
-        state.models = state.models.filter((m) => m.id !== deleted.id);
-        if (state.selectedModel?.id === deleted.id) {
+        const deletedId = action.payload; 
+        state.models = state.models.filter((m) => m.id !== deletedId);
+        if (state.selectedModel?.id === deletedId) {
           state.selectedModel = null;
         }
       })
