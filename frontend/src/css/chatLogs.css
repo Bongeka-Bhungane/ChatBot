@@ -37,6 +37,51 @@
   margin-bottom: 16px;
 }
 
+.chatlogs-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.chatlogs-pagination.bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 10px;
+  padding-top: 12px;
+}
+
+.pager-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pager-pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pager-page {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: inherit;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pager-page.active {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pager-gap {
+  opacity: 0.6;
+  padding: 0 4px;
+}
+
 .filter {
   display: flex;
   flex-direction: column;

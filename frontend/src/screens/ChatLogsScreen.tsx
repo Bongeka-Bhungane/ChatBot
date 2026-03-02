@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../redux/store";
 import {
@@ -180,20 +180,11 @@ function classifyStuckStage(
       "dotenv",
       "npm i",
       "yarn add",
-      "pnpm",
     ])
   )
     return "setup";
   if (
-    includesAny(text, [
-      "build",
-      "compile",
-      "vite",
-      "webpack",
-      "bundl",
-      "tsc",
-      "babel",
-    ])
+    includesAny(text, ["build", "compile", "vite", "webpack", "tsc", "babel"])
   )
     return "build";
   if (
@@ -216,8 +207,6 @@ function classifyStuckStage(
       "cors",
       "401",
       "403",
-      "500",
-      "route",
     ])
   )
     return "api";
@@ -234,17 +223,7 @@ function classifyStuckStage(
     ])
   )
     return "db";
-  if (
-    includesAny(text, [
-      "css",
-      "align",
-      "layout",
-      "padding",
-      "margin",
-      "component",
-      "ui",
-    ])
-  )
+  if (includesAny(text, ["css", "align", "layout", "padding", "margin", "ui"]))
     return "ui";
   if (
     includesAny(text, [
@@ -261,40 +240,15 @@ function classifyStuckStage(
   return "unknown";
 }
 
-/** Date utils for time filters */
-function inLastHours(iso: string | null, hours: number) {
-  if (!iso) return false;
+/** Date helpers */
+function toYMD(iso: string | null | undefined) {
+  if (!iso) return null;
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return false;
-  const ms = hours * 60 * 60 * 1000;
-  return Date.now() - d.getTime() <= ms;
-}
-
-function inThisWeek(iso: string | null) {
-  if (!iso) return false;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return false;
-
-  // Week starts Monday
-  const now = new Date();
-  const day = (now.getDay() + 6) % 7; // Mon=0..Sun=6
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(now.getDate() - day);
-
-  return d >= start && d <= now;
-}
-
-function isMonday(iso: string | null) {
-  if (!iso) return false;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return false;
-  // JS: Sun=0, Mon=1
-  return d.getDay() === 1;
-}
-
-function dayName(d: number) {
-  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d] || "";
+  if (Number.isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 /* ================= Screen ================= */
@@ -316,6 +270,9 @@ export default function ChatLogsScreen() {
   const [framework, setFramework] = useState<string>("");
   const [code, setCode] = useState<"" | "true" | "false">("");
 
+  // NEW: specific date filter (YYYY-MM-DD from input[type=date])
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   // Insight filters (client-side)
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("");
   const [stackArea, setStackArea] = useState<
@@ -333,12 +290,13 @@ export default function ChatLogsScreen() {
     | "ui"
     | "unknown"
   >("");
-  const [dayOfWeek, setDayOfWeek] = useState<
-    "" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"
-  >("");
 
   // Row expand
   const [openId, setOpenId] = useState<string | null>(null);
+
+  // NEW: pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<10 | 25 | 50 | 100>(25);
 
   const args: FetchChatLogsArgs = useMemo(
     () => ({
@@ -364,13 +322,16 @@ export default function ChatLogsScreen() {
     setFramework("");
     setCode("");
 
+    setSelectedDate("");
     setTimeWindow("");
     setStackArea("");
     setIntent("");
     setStuckStage("");
-    setDayOfWeek("");
 
     setOpenId(null);
+
+    setPage(1);
+    setPageSize(25);
   };
 
   // Dropdown options from data
@@ -392,17 +353,20 @@ export default function ChatLogsScreen() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [logs]);
 
-  // Apply insight filters client-side
+  // Apply client-side filters (including NEW: selectedDate)
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
-      if (timeWindow === "24h" && !inLastHours(log.createdAt, 24)) return false;
-      if (timeWindow === "7d" && !inThisWeek(log.createdAt)) return false;
-      if (timeWindow === "mon" && !isMonday(log.createdAt)) return false;
+      // Specific date filter (matches YYYY-MM-DD)
+      if (selectedDate) {
+        const ymd = toYMD(log.createdAt);
+        if (!ymd) return false;
+        if (ymd !== selectedDate) return false;
+      }
 
-      if (dayOfWeek) {
-        const d = log.createdAt ? new Date(log.createdAt) : null;
-        if (!d || Number.isNaN(d.getTime())) return false;
-        if (dayName(d.getDay()) !== dayOfWeek) return false;
+      // Keep your insight filters (if you re-enable them later)
+      if (timeWindow) {
+        // NOTE: You commented out UI for timeWindow, but logic stays safe.
+        // If you want, you can remove this block entirely.
       }
 
       if (stackArea) {
@@ -422,8 +386,48 @@ export default function ChatLogsScreen() {
 
       return true;
     });
-  }, [logs, timeWindow, stackArea, intent, stuckStage, dayOfWeek]);
+  }, [logs, selectedDate, timeWindow, stackArea, intent, stuckStage]);
 
+  // NEW: reset pagination when filters change
+  useEffect(() => {
+    setPage(1);
+    setOpenId(null);
+  }, [
+    search,
+    lang,
+    type,
+    framework,
+    code,
+    selectedDate,
+    timeWindow,
+    stackArea,
+    intent,
+    stuckStage,
+  ]);
+
+  // NEW: sort by newest first before paginating (optional but recommended)
+  const sortedFilteredLogs = useMemo(() => {
+    const copy = [...filteredLogs];
+    copy.sort((a, b) => {
+      const ad = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bd - ad;
+    });
+    return copy;
+  }, [filteredLogs]);
+
+  // NEW: pagination derived values
+  const totalItems = sortedFilteredLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(page, totalPages);
+
+  const pagedLogs = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    const end = start + pageSize;
+    return sortedFilteredLogs.slice(start, end);
+  }, [sortedFilteredLogs, safePage, pageSize]);
+
+  // Insight stats (kept)
   const insightStats = useMemo(() => {
     const total = filteredLogs.length;
 
@@ -457,14 +461,8 @@ export default function ChatLogsScreen() {
       stageCount.set(st, (stageCount.get(st) || 0) + 1);
 
       if (l.createdAt) {
-        const d = new Date(l.createdAt);
-        if (!Number.isNaN(d.getTime())) {
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-            2,
-            "0",
-          )}-${String(d.getDate()).padStart(2, "0")}`;
-          dayCount.set(key, (dayCount.get(key) || 0) + 1);
-        }
+        const key = toYMD(l.createdAt);
+        if (key) dayCount.set(key, (dayCount.get(key) || 0) + 1);
       }
     }
 
@@ -499,6 +497,34 @@ export default function ChatLogsScreen() {
       perDay,
     };
   }, [filteredLogs]);
+
+  const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
+
+  const pageButtons = useMemo(() => {
+    // compact pager: show first, last, and +/-2 around current
+    const cur = safePage;
+    const set = new Set<number>([
+      1,
+      totalPages,
+      cur - 2,
+      cur - 1,
+      cur,
+      cur + 1,
+      cur + 2,
+    ]);
+    const nums = Array.from(set)
+      .filter((n) => n >= 1 && n <= totalPages)
+      .sort((a, b) => a - b);
+
+    // insert "gaps" marker as 0
+    const out: number[] = [];
+    for (let i = 0; i < nums.length; i++) {
+      out.push(nums[i]);
+      const next = nums[i + 1];
+      if (next && next - nums[i] > 1) out.push(0);
+    }
+    return out;
+  }, [safePage, totalPages]);
 
   return (
     <div className="admin-layout">
@@ -554,18 +580,18 @@ export default function ChatLogsScreen() {
               <div className="insight-k">Hardest framework</div>
               <div className="insight-v">{insightStats.topFw}</div>
             </div>
-            <div className="insight-card">
+            {/* <div className="insight-card">
               <div className="insight-k">Backend code included</div>
               <div className="insight-v">{insightStats.backendCodeRate}</div>
-            </div>
-            <div className="insight-card">
+            </div> */}
+            {/* <div className="insight-card">
               <div className="insight-k">How vs broken</div>
               <div className="insight-v">{insightStats.howVsBroken}</div>
-            </div>
-            <div className="insight-card">
+            </div> */}
+            {/* <div className="insight-card">
               <div className="insight-k">Where stuck most</div>
               <div className="insight-v">{insightStats.topStage}</div>
-            </div>
+            </div> */}
           </div>
 
           <div className="chatlogs-filters insight-filters">
@@ -574,7 +600,7 @@ export default function ChatLogsScreen() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search question / answer / model / source / keywords (e.g. 'database', 'CORS', 'ts(2322)')"
+                placeholder="Search question / answer / model / source / keywords"
               />
               {search ? (
                 <button
@@ -626,92 +652,27 @@ export default function ChatLogsScreen() {
               </select>
             </div>
 
-            {/* <div className="filter">
-              <label>Has code</label>
-              <select
-                value={code}
-                onChange={(e) => setCode(e.target.value as any)}
-              >
-                <option value="">All</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            </div> */}
-
-            {/* <div className="filter">
-              <label>Time window</label>
-              <select
-                value={timeWindow}
-                onChange={(e) => setTimeWindow(e.target.value as TimeWindow)}
-              >
-                <option value="">All time (loaded)</option>
-                <option value="24h">Last 24 hours</option>
-                <option value="7d">This week (Mon→today)</option>
-                <option value="mon">Mondays only</option>
-              </select>
-            </div>
-
+            {/* NEW: specific date picker */}
             <div className="filter">
-              <label>Day of week</label>
-              <select
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(e.target.value as any)}
-              >
-                <option value="">Any</option>
-                <option value="Mon">Mon</option>
-                <option value="Tue">Tue</option>
-                <option value="Wed">Wed</option>
-                <option value="Thu">Thu</option>
-                <option value="Fri">Fri</option>
-                <option value="Sat">Sat</option>
-                <option value="Sun">Sun</option>
-              </select>
+              <label>Date</label>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+                {selectedDate ? (
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setSelectedDate("")}
+                    title="Clear date"
+                    type="button"
+                  >
+                    <FiX />
+                  </button>
+                ) : null}
+              </div>
             </div>
-
-            <div className="filter">
-              <label>Stack area</label>
-              <select
-                value={stackArea}
-                onChange={(e) => setStackArea(e.target.value as any)}
-              >
-                <option value="">All</option>
-                <option value="frontend">Frontend</option>
-                <option value="backend">Backend</option>
-                <option value="database">Database</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div className="filter">
-              <label>Intent</label>
-              <select
-                value={intent}
-                onChange={(e) => setIntent(e.target.value as any)}
-              >
-                <option value="">All</option>
-                <option value="how">How it works</option>
-                <option value="broken">Code broken</option>
-                <option value="unknown">Unknown</option>
-              </select>
-            </div>
-
-            <div className="filter">
-              <label>Where stuck</label>
-              <select
-                value={stuckStage}
-                onChange={(e) => setStuckStage(e.target.value as any)}
-              >
-                <option value="">All</option>
-                <option value="setup">Setup / install</option>
-                <option value="build">Build / compile</option>
-                <option value="types">Types / TS</option>
-                <option value="runtime">Runtime crash</option>
-                <option value="api">API / auth / server</option>
-                <option value="db">Database</option>
-                <option value="ui">UI / layout</option>
-                <option value="unknown">Unknown</option>
-              </select>
-            </div> */}
           </div>
 
           {insightStats.perDay.length ? (
@@ -729,6 +690,67 @@ export default function ChatLogsScreen() {
               </div>
             </div>
           ) : null}
+
+          {/* NEW: Pagination bar (top) */}
+          <div className="chatlogs-pagination">
+            <div className="pager-left">
+              <span className="muted">
+                Showing{" "}
+                <b>
+                  {totalItems === 0 ? 0 : (safePage - 1) * pageSize + 1}–
+                  {Math.min(safePage * pageSize, totalItems)}
+                </b>{" "}
+                of <b>{totalItems}</b>
+              </span>
+            </div>
+
+            <div className="pager-right">
+              <label className="muted">Rows</label>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value) as any)}
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => goToPage(safePage - 1)}
+                disabled={safePage <= 1}
+              >
+                Prev
+              </button>
+
+              <div className="pager-pages">
+                {pageButtons.map((n, idx) =>
+                  n === 0 ? (
+                    <span key={`gap-${idx}`} className="pager-gap">
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={n}
+                      className={`pager-page ${n === safePage ? "active" : ""}`}
+                      onClick={() => goToPage(n)}
+                    >
+                      {n}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => goToPage(safePage + 1)}
+                disabled={safePage >= totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
 
           <div className="chatlogs-body">
             {loading ? (
@@ -749,13 +771,12 @@ export default function ChatLogsScreen() {
                   </button>
                 </div>
               </div>
-            ) : !filteredLogs.length ? (
+            ) : !sortedFilteredLogs.length ? (
               <div className="state-box">
                 <div>
                   <div className="state-title">No logs match these filters</div>
                   <div className="state-sub">
-                    Try clearing the insight filters or widening the time
-                    window.
+                    Try clearing filters or picking a different date.
                   </div>
                 </div>
               </div>
@@ -764,7 +785,7 @@ export default function ChatLogsScreen() {
                 <table className="chatlogs-table">
                   <thead>
                     <tr>
-                      <th style={{ width: 90 }}>Date</th>
+                      <th style={{ width: 140 }}>Date</th>
                       <th>Question</th>
                       <th style={{ width: 120 }}>Model</th>
                       <th style={{ width: 140 }}>Source</th>
@@ -778,11 +799,12 @@ export default function ChatLogsScreen() {
                   </thead>
 
                   <tbody>
-                    {filteredLogs.map((log) => {
+                    {pagedLogs.map((log) => {
                       const isOpen = openId === log.id;
+
                       return (
-                        <>
-                          <tr key={log.id} className={isOpen ? "row-open" : ""}>
+                        <Fragment key={log.id}>
+                          <tr className={isOpen ? "row-open" : ""}>
                             <td className="mono small">
                               {formatDate(log.createdAt)}
                             </td>
@@ -858,7 +880,7 @@ export default function ChatLogsScreen() {
                           </tr>
 
                           {isOpen ? (
-                            <tr key={`${log.id}-detail`} className="detail-row">
+                            <tr className="detail-row">
                               <td colSpan={9}>
                                 <div className="detail-grid">
                                   <div className="detail-block">
@@ -919,11 +941,51 @@ export default function ChatLogsScreen() {
                               </td>
                             </tr>
                           ) : null}
-                        </>
+                        </Fragment>
                       );
                     })}
                   </tbody>
                 </table>
+
+                {/* NEW: Pagination bar (bottom) */}
+                <div className="chatlogs-pagination bottom">
+                  <div className="pager-left">
+                    <span className="muted">
+                      Page <b>{safePage}</b> of <b>{totalPages}</b>
+                    </span>
+                  </div>
+
+                  <div className="pager-right">
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => goToPage(1)}
+                      disabled={safePage <= 1}
+                    >
+                      First
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => goToPage(safePage - 1)}
+                      disabled={safePage <= 1}
+                    >
+                      Prev
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => goToPage(safePage + 1)}
+                      disabled={safePage >= totalPages}
+                    >
+                      Next
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => goToPage(totalPages)}
+                      disabled={safePage >= totalPages}
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
