@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSettings, FiSend } from "react-icons/fi";
 import ModelDropdown from "../components/ModelDropdown";
@@ -45,6 +45,13 @@ export default function ChatScreen() {
   const { currentChat, chats } = useSelector((state: RootState) => state.chats);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   useEffect(() => {
     setMessages((prev) => {
@@ -122,25 +129,28 @@ export default function ChatScreen() {
             ) : (
               <>
                 {messages.map((ms, index) => (
-                  <div key={index} className={`chat-bubble ${ms.sender}`}>
-                    <div>
-                      <MarkdownPreview
-                        source={ms.text}
-                        style={{
-                          background: "transparent",
-                          color: "inherit",
-                          padding: 0,
-                          fontSize: "14px",
-                        }}
-                      />
-                    </div>
+                  <>
+                    <div key={index} className={`chat-bubble ${ms.sender}`}>
+                      <div>
+                        <MarkdownPreview
+                          source={ms.text}
+                          style={{
+                            background: "transparent",
+                            color: "inherit",
+                            padding: 0,
+                            fontSize: "14px",
+                          }}
+                        />
+                      </div>
 
-                    {ms.sender === "bot" && (
-                      <span className="response-time">
-                        Responded in {ms.duration ? ms.duration : 0}
-                      </span>
-                    )}
-                  </div>
+                      {ms.sender === "bot" && (
+                        <span className="response-time">
+                          Responded in {ms.duration ? ms.duration : 0}
+                        </span>
+                      )}
+                    </div>
+                    <div ref={scrollRef}></div>
+                  </>
                 ))}
 
                 {isThinking && (
