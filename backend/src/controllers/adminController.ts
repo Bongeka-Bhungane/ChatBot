@@ -10,6 +10,8 @@ import { Admin } from "../types/admin";
 import { validateEmail } from "../utils/emailValidator";
 import { supabase } from "../lib/supabase";
 
+
+// get all the admins from the admins table on database
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
     const admins = await getAdminsDB();
@@ -19,6 +21,8 @@ export const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
+
+// get 1 admin by ID 
 export const getAdminById = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
@@ -29,6 +33,7 @@ export const getAdminById = async (req: Request, res: Response) => {
   }
 };
 
+// Add new admin (register admin) to the database
 export const addAdmin = async (req: Request, res: Response) => {
   try {
     const payload = req.body as Admin;
@@ -47,6 +52,8 @@ export const addAdmin = async (req: Request, res: Response) => {
   }
 };
 
+
+// update admins details
 export const updateAdmin = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const payload = req.body as Admin;
@@ -58,6 +65,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
   }
 };
 
+// 
 export const loginAdmin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
@@ -75,6 +83,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
   }
 };
 
+// Remove admin/s from the database
 export const deleteAdmin = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
