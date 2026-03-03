@@ -1,39 +1,26 @@
-// src/redux/chatLogsSlice.ts
+/*-------------------------------- IMPORTS --------------------------------*/
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { RootState } from "./store";
+import type { ChatLog, FetchChatLogsArgs } from "../types/ChatLog";
+
+/*-------------------------------- STATES --------------------------------*/
+type ChatLogsState = {
+  logs: ChatLog[];
+  loading: boolean;
+  error: string | null;
+};
+
+const initialState: ChatLogsState = {
+  logs: [],
+  loading: false,
+  error: null,
+};
 
 const BASE_URL = "https://chatbot-w3ue.onrender.com";
-const LOGS_PATH = "/api/admins/logs"; // router.get("/logs", getChatLogs)
+const LOGS_PATH = "/api/admins/logs";
 
-export type ChatLog = {
-  id: string;
-  question: string | null;
-  answer: string | null;
-  source: string | null;
+/*-------------------------------- THUNKS --------------------------------*/
 
-  inscope: boolean | null;
-  incontext: boolean | null; // ✅ from your table
-  appropriate: boolean | null;
-
-  modelused: string | null;
-
-  createdAt: string | null; // ✅ from your table
-
-  language_env: string | null;
-  question_type: string | null;
-  framework: string | null;
-
-  has_code: boolean | null;
-};
-
-export type FetchChatLogsArgs = {
-  search?: string;
-  lang?: string;
-  type?: string;
-  framework?: string;
-  code?: boolean;
-};
-
+// function that convert params to query string
 function toQueryString(params: Record<string, string | undefined>) {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -43,6 +30,7 @@ function toQueryString(params: Record<string, string | undefined>) {
   return s ? `?${s}` : "";
 }
 
+// [GET] fetchChatLogs -> get all chat logs
 export const fetchChatLogs = createAsyncThunk<ChatLog[], FetchChatLogsArgs>(
   "chatLogs/fetch",
   async (args, { rejectWithValue }) => {
@@ -75,18 +63,7 @@ export const fetchChatLogs = createAsyncThunk<ChatLog[], FetchChatLogsArgs>(
   },
 );
 
-type ChatLogsState = {
-  logs: ChatLog[];
-  loading: boolean;
-  error: string | null;
-};
-
-const initialState: ChatLogsState = {
-  logs: [],
-  loading: false,
-  error: null,
-};
-
+/*-------------------------------- SLICE --------------------------------*/
 const chatLogsSlice = createSlice({
   name: "chatLogs",
   initialState,
@@ -112,8 +89,3 @@ const chatLogsSlice = createSlice({
 });
 
 export default chatLogsSlice.reducer;
-
-export const selectChatLogs = (state: RootState) => state.chatLogs.logs;
-export const selectChatLogsLoading = (state: RootState) =>
-  state.chatLogs.loading;
-export const selectChatLogsError = (state: RootState) => state.chatLogs.error;

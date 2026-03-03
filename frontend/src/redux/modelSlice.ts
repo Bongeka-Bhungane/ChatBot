@@ -1,38 +1,33 @@
-// src/redux/modelSlice.ts
+/*-------------------------------- IMPORTS --------------------------------*/
 import {
   createAsyncThunk,
   createSlice,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import type { RootState } from "./store";
 import axios from "axios";
+import type { Model } from "../types/Model";
 
+/*-------------------------------- STATES --------------------------------*/
 
-const BASE_URL = "https://chatbot-w3ue.onrender.com";
+type ModelsState = {
+  models: Model[];
+  selectedModel: Model | null;
+  loading: boolean;
+  error: string | null;
+};
 
-
-const API_PATH = "/models";
-
-
-export type ModelCategory =
-  | "Policy & Compliance"
-  | "Technical  & Logic"
-  | "Navigation & Support";
-
-export interface Model {
-  id?: string;
-  apiKey: string;
-  name: string;
-  fullName: string;
-  systemPrompt: string;
-  category: ModelCategory;
-  createdAt?: string; 
-  updatedAt?: string; 
-  isHidden?: boolean;
-}
+const initialState: ModelsState = {
+  models: [],
+  selectedModel: null,
+  loading: false,
+  error: null,
+};
 
 type ApiError = { error?: string; message?: string };
+const BASE_URL = "https://chatbot-w3ue.onrender.com";
+const API_PATH = "/models";
 
+/*-------------------------------- THUNKS --------------------------------*/
 async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -45,7 +40,6 @@ async function apiRequest<T>(
     ...options,
   });
 
-  
   const text = await res.text();
   const data = text ? (JSON.parse(text) as string) : null;
 
@@ -59,10 +53,6 @@ async function apiRequest<T>(
 
   return data as T;
 }
-
-/* =========================
-   Thunks (Async Actions)
-========================= */
 
 export const fetchModels = createAsyncThunk<Model[]>(
   "models/fetchAll",
@@ -127,7 +117,7 @@ export const deleteModel = createAsyncThunk<string, string>(
       const message = error.response?.data?.message || "Failed to delete model";
       return rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const toggleModelHidden = createAsyncThunk<
@@ -140,23 +130,7 @@ export const toggleModelHidden = createAsyncThunk<
   });
 });
 
-/* =========================
-   Slice
-========================= */
-
-type ModelsState = {
-  models: Model[];
-  selectedModel: Model | null;
-  loading: boolean;
-  error: string | null;
-};
-
-const initialState: ModelsState = {
-  models: [],
-  selectedModel: null,
-  loading: false,
-  error: null,
-};
+/*-------------------------------- SLICE --------------------------------*/
 
 const modelsSlice = createSlice({
   name: "models",
@@ -251,7 +225,7 @@ const modelsSlice = createSlice({
 
       .addCase(deleteModel.fulfilled, (state, action) => {
         state.loading = false;
-        const deletedId = action.payload; 
+        const deletedId = action.payload;
         state.models = state.models.filter((m) => m.id !== deletedId);
         if (state.selectedModel?.id === deletedId) {
           state.selectedModel = null;
@@ -282,15 +256,4 @@ const modelsSlice = createSlice({
 
 export const { clearModelError, clearSelectedModel, setSelectedModel } =
   modelsSlice.actions;
-
 export default modelsSlice.reducer;
-
-/* =========================
-   Selectors
-========================= */
-
-export const selectModels = (state: RootState) => state.models.models;
-export const selectModelsLoading = (state: RootState) => state.models.loading;
-export const selectModelsError = (state: RootState) => state.models.error;
-export const selectSelectedModel = (state: RootState) =>
-  state.models.selectedModel;

@@ -1,22 +1,17 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+/*-------------------------------- IMPORTS --------------------------------*/
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import type { Document } from "../types/Document";
 
-export interface Document {
-  id: string;
-  name: string;
-  url: string;
-  fileType: string;
-  content: string;
-  storagePath: string;
-  createdAt?: string;
-}
-
+/*-------------------------------- STATE --------------------------------*/
 interface DocumentState {
   documents: Document[];
   loading: boolean;
   error: string | null;
 }
-
-const BACKEND_URL = "https://chatbot-w3ue.onrender.com"; // update if deployed
 
 const initialState: DocumentState = {
   documents: [],
@@ -24,7 +19,9 @@ const initialState: DocumentState = {
   error: null,
 };
 
-// Fetch all documents
+const BACKEND_URL = "https://chatbot-w3ue.onrender.com";
+
+/*-------------------------------- THUNKS --------------------------------*/
 export const fetchDocuments = createAsyncThunk(
   "documents/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -94,6 +91,7 @@ export const deleteDocument = createAsyncThunk(
   },
 );
 
+/*-------------------------------- SLICE --------------------------------*/
 const documentSlice = createSlice({
   name: "documents",
   initialState,

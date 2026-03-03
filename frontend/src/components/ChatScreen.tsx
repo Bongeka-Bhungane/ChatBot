@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../redux/store";
 import { sendChat } from "../redux/chatSlice";
 import MarkdownPreview from "@uiw/react-markdown-preview";
-import { selectModels, type Model } from "../redux/modelSlice";
 
 type Message = {
   sender: "user" | "bot";
@@ -24,7 +23,7 @@ export default function ChatScreen() {
   const [input, setInput] = useState("");
 
   // ✅ dropdown uses modelId now
-  const models = useSelector(selectModels) as Model[];
+  const { models } = useSelector((state: RootState) => state.models);
   const [modelId, setModelId] = useState<string | null>(null);
 
   // ✅ derive ChatModel from selected model in store

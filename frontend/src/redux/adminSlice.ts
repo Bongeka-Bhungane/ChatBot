@@ -1,13 +1,8 @@
+/*-------------------------------- IMPORTS --------------------------------*/
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { Admin } from "../types/Admin";
 
-export interface Admin {
-  id?: string;
-  fullName: string;
-  email: string;
-  password: string;
-  createdAt?: Date | string;
-}
-
+/*-------------------------------- STATES --------------------------------*/
 interface AdminState {
   admins: Admin[];
   loading: boolean;
@@ -22,16 +17,16 @@ const initialState: AdminState = {
 
 const API_URL = "https://chatbot-w3ue.onrender.com/api/admins";
 
-// ------------------- ASYNC ACTIONS -------------------
+/*-------------------------------- THUNKS --------------------------------*/
 
-// GET ADMINS
+// [GET] fetchAdmins -> get a list of all the admins on DB
 export const fetchAdmins = createAsyncThunk("admins/fetch", async () => {
   const res = await fetch(API_URL);
   if (!res.ok) throw new Error("Failed to fetch admins");
   return res.json();
 });
 
-// ADD ADMIN
+// [POST] addAdmin -> add a new admin
 export const addAdmin = createAsyncThunk("admins/add", async (admin: Admin) => {
   const res = await fetch(`${API_URL}/register`, {
     method: "POST",
@@ -43,7 +38,7 @@ export const addAdmin = createAsyncThunk("admins/add", async (admin: Admin) => {
   return res.json();
 });
 
-// ✅ DELETE ADMIN
+// [DELETE] deleteAdmin -> delete an admin
 export const deleteAdmin = createAsyncThunk(
   "admins/delete",
   async (adminId: string) => {
@@ -59,7 +54,7 @@ export const deleteAdmin = createAsyncThunk(
   },
 );
 
-// ------------------- SLICE -------------------
+/*-------------------------------- SLICE --------------------------------*/
 
 const adminSlice = createSlice({
   name: "admins",
@@ -67,7 +62,7 @@ const adminSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // FETCH ADMINS
+      // fetchAdmins
       .addCase(fetchAdmins.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -80,16 +75,13 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = "Failed to fetch admins";
       })
-
-      // ADD ADMIN
+      // addAdmin
       .addCase(addAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(addAdmin.fulfilled, (state, action) => {
         state.loading = false;
-
-        // Prefer the API response (likely includes id), fallback to arg
         const created = action.payload ?? action.meta.arg;
         state.admins.push(created);
       })
@@ -97,8 +89,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = "Failed to add admin";
       })
-
-      // ✅ DELETE ADMIN
+      // deleteAdmin
       .addCase(deleteAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;

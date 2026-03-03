@@ -1,7 +1,9 @@
+/*-------------------------------- IMPORTS --------------------------------*/
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { Chat, ChatResponse } from "../types/Chat";
 import axios from "axios";
 
+/*-------------------------------- STATES --------------------------------*/
 interface ChatState {
   chats: ChatResponse[];
   currentChat: ChatResponse | null;
@@ -16,8 +18,9 @@ const initialState: ChatState = {
   error: null,
 };
 
-// Use localhost for your local testing environment
-const BASE_URL = "https://chatbot-w3ue.onrender.com/api/chat"; 
+const BASE_URL = "https://chatbot-w3ue.onrender.com/api/chat";
+
+/*-------------------------------- THUNKS --------------------------------*/
 
 export const sendChat = createAsyncThunk(
   "chat/send",
@@ -29,12 +32,15 @@ export const sendChat = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       // Logic Fix: Extract the error message before returning
-      const errorMessage = error.response?.data?.error || error.message || "Something went wrong";
+      const errorMessage =
+        error.response?.data?.error || error.message || "Something went wrong";
       console.error("Error sending chat:", errorMessage);
       return rejectWithValue(errorMessage);
     }
-  }
+  },
 );
+
+/*-------------------------------- SLICE --------------------------------*/
 
 const chatSlice = createSlice({
   name: "chat",
@@ -44,7 +50,7 @@ const chatSlice = createSlice({
     clearChat: (state) => {
       state.chats = [];
       state.currentChat = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(sendChat.pending, (state) => {
