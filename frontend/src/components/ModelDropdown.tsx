@@ -3,13 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "../dropdown.css";
 import { FaCheck } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch } from "../redux/store";
-import {
-  fetchModels,
-  selectModels,
-  selectModelsLoading,
-  type Model,
-} from "../redux/modelSlice";
+import type { AppDispatch, RootState } from "../redux/store";
+import { fetchModels } from "../redux/modelSlice";
 
 type ModelDropdownProps = {
   model: string | null; // selected model id
@@ -19,8 +14,7 @@ type ModelDropdownProps = {
 
 export default function ModelDropdown({ model, setModel }: ModelDropdownProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const models = useSelector(selectModels) as Model[];
-  const loading = useSelector(selectModelsLoading);
+  const { models, loading } = useSelector((state: RootState) => state.models);
 
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);

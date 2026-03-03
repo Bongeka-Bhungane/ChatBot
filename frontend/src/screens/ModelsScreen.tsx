@@ -3,18 +3,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import "../css/modelScreen.css";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch } from "../redux/store";
+import type { AppDispatch, RootState } from "../redux/store";
 import {
   fetchModels,
   createModel,
   updateModel,
   deleteModel,
   toggleModelHidden,
-  selectModels,
-  selectModelsLoading,
-  selectModelsError,
-  type ModelCategory,
 } from "../redux/modelSlice";
+import type { ModelCategory } from "../types/Model";
 
 /** ✅ Match your DB table */
 type ModelRow = {
@@ -65,9 +62,11 @@ export default function ModelScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  const modelsFromStore = useSelector(selectModels) as unknown as ModelRow[];
-  const loading = useSelector(selectModelsLoading);
-  const error = useSelector(selectModelsError);
+  const {
+    loading,
+    error,
+    models: modelsFromStore,
+  } = useSelector((state: RootState) => state.models);
 
   const [keyVisibility, setKeyVisibility] = useState<Record<string, boolean>>(
     {},
