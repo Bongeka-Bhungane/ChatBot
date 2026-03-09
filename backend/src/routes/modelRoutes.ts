@@ -9,6 +9,7 @@ import {
 
 const router = Router();
 
+//.....................model endpoints.................
 router.get("/", getAllModels);
 router.get("/:id", getModelById);
 router.post("/", createModel);

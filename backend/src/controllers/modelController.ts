@@ -7,6 +7,7 @@ import {
   updateModelDB,
 } from "../Services/modelService";
 
+// Get all the models from the models table in the database (method: GET)
 export const getAllModels = async (req: Request, res: Response) => {
   try {
     const models = await getAllModelsDB();
@@ -19,6 +20,7 @@ export const getAllModels = async (req: Request, res: Response) => {
   }
 };
 
+// Get a single model by ID from models table
 export const getModelById = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
@@ -31,6 +33,8 @@ export const getModelById = async (req: Request, res: Response) => {
   }
 };
 
+
+// Create or add a model into the models table (method : POST)
 export const createModel = async (req: Request, res: Response) => {
   try {
     const model = await createModelDB(req.body);
@@ -43,6 +47,7 @@ export const createModel = async (req: Request, res: Response) => {
   }
 };
 
+// Update model/s details (method: PUT)
 export const updateModel = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
@@ -55,6 +60,7 @@ export const updateModel = async (req: Request, res: Response) => {
   }
 };
 
+// Delete or remove a models from the models table (method: DELETE)
 export const deleteModel = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   try {
