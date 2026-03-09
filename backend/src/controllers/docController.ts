@@ -49,6 +49,7 @@ export const getFileUrl = async (req: Request, res: Response) => {
   }
 };
 
+// Get all the documents from the documents table on the database
 export const getAllDocs = async (_req: Request, res: Response) => {
   try {
     const docs = await docService.fetchAllDocsDB();
@@ -57,6 +58,8 @@ export const getAllDocs = async (_req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// get a single document by using it ID
 export const getDocById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -67,6 +70,8 @@ export const getDocById = async (req: Request, res: Response) => {
   }
 };
 
+
+// Update documents details 
 export const updateDoc = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -78,6 +83,7 @@ export const updateDoc = async (req: Request, res: Response) => {
   }
 };
 
+// Remove document from the database
 export const deleteDoc = async (req: Request, res: Response) => {
   try {
     const { id } = req.params

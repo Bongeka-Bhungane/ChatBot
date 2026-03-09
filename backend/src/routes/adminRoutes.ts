@@ -10,7 +10,7 @@ import {
 } from "../controllers/adminController";
 
 const router = Router();
-
+//............................Admin endpoints..................
 router.get("/", getAllAdmins);
 router.get("/logs", getChatLogs);
 router.get("/:id", getAdminById);

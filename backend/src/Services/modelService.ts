@@ -3,7 +3,7 @@ import { Model } from "../types/Model";
 
 const DB_NAME = "Models";
 
-// CRUD
+//.................................... CRUD OPERATIONS............
 
 export const createModelDB = async (model: Model) => {
   console.log(900, model);
@@ -20,6 +20,8 @@ export const createModelDB = async (model: Model) => {
   return data;
 };
 
+
+// Fetch all the models from the database
 export const getAllModelsDB = async () => {
   const { data, error } = await supabase.from(DB_NAME).select("*");
   if (error) {
@@ -28,6 +30,7 @@ export const getAllModelsDB = async () => {
   return data;
 };
 
+// get a single models by ID
 export const getModelByIdDB = async (id: string) => {
   const { data, error } = await supabase
     .from(DB_NAME)
@@ -40,6 +43,7 @@ export const getModelByIdDB = async (id: string) => {
   return data;
 };
 
+// Delete the models from database
 export const deleteModelDB = async (id: string) => {
   const { data, error } = await supabase
     .from(DB_NAME)
@@ -53,6 +57,8 @@ export const deleteModelDB = async (id: string) => {
   return data;
 };
 
+
+// update the model details
 export const updateModelDB = async (id: string, model: Partial<Model>) => {
   const { data, error } = await supabase
     .from(DB_NAME)
