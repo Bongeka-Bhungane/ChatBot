@@ -9,9 +9,9 @@ import {
   fetchDocuments,
   uploadDocument,
   deleteDocument,
-  type Document,
 } from "../redux/documentSlice";
 import { useNavigate } from "react-router-dom"; // ✅ add
+import { type Document } from "../types/Document";
 
 const stats = [
   { title: "Total Queries", value: "12,430" },

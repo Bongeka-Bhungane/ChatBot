@@ -5,12 +5,12 @@ import {
   fetchAdmins,
   deleteAdmin,
   addAdmin,
-  type Admin,
 } from "../redux/adminSlice";
 import { FiTrash2 } from "react-icons/fi";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../css/adminList.css";
+import type { Admin } from "../types/Admin";
 
 type AdminForm = {
   fullName: string;
